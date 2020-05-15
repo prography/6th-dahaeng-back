@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from .serializers import ProfileSerializer
+from django.contrib.auth import get_user_model
 
 
 def main(request):
@@ -12,6 +13,11 @@ def main(request):
 
 class CreateProfileView(APIView):
     permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        queryset = get_user_model().objects.all()
+        serializer = ProfileSerializer(queryset, many=True)
+        return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
         """
