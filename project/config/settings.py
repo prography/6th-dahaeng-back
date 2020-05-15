@@ -1,6 +1,7 @@
 import json
 import os
 from os.path import abspath, dirname, join
+import datetime
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -124,3 +125,11 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 AUTH_USER_MODEL = "core.Profile"
+
+JWT_AUTH = {
+    'JWT_ALLOW_REFRESH': True,
+    # access token
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(hours=1),
+    # refresh token
+    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=2),
+}
