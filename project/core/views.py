@@ -14,6 +14,16 @@ class CreateProfileView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
+        """
+        {
+            "profile": {
+                "username": "rkdalstjd9",
+                "password": "qwe123",
+                "email": "rkdalstjd9@naver.com",
+                "nickname": "arkss"
+            }
+        }
+        """
         data = request.data.get('profile')
         if not data:
             return Response({

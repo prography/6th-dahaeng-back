@@ -2,7 +2,7 @@ from rest_framework import serializers as sz
 from django.contrib.auth import get_user_model
 
 
-class ProfileSerializer(sz.ModelSeializer):
+class ProfileSerializer(sz.ModelSerializer):
     password = sz.CharField(write_only=True)
 
     def create(self, validated_data):
