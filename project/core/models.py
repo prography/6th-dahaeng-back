@@ -25,7 +25,8 @@ class UserManager(BaseUserManager):
             username=username,
             email=email,
             password=password,
-            nickname=nickname
+            # 관리자의 경우 nickname이 필요없지만 unique해야하므로 username을 nickname으로 사용
+            nickname=username
         )
         user.status = '1'
         user.role = '10'
