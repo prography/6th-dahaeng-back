@@ -7,4 +7,8 @@ urlpatterns = [
     path('login/', obtain_jwt_token, name='login'),
     path('refresh/', refresh_jwt_token, name='refresh'),
     path('signup/', views.CreateProfileView.as_view(), name='signup'),
+    path('send_email_for_active/', views.send_email_for_active,
+         name='send_email_for_active'),
+    path('user_active/',
+         views.user_active, name="user_active"),
 ]
