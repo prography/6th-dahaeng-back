@@ -63,3 +63,8 @@ class Profile(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+
+class Jorang(models.Model):
+    nickname = models.CharField(max_length=50)
+    color = models.CharField(max_length=6, help_text='16진수 코드 6개 ex) FFFFFF')
