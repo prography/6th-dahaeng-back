@@ -2,9 +2,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view, permission_classes
-from .serializers import ProfileSerializer
+from rest_framework_jwt.utils import jwt_decode_handler
+from rest_framework_jwt.views import ObtainJSONWebToken
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import update_last_login
 from config.permissions import MyIsAuthenticated
+from .serializers import ProfileSerializer
 
 # email
 from django.contrib.sites.shortcuts import get_current_site
@@ -23,6 +26,7 @@ class CreateProfileView(APIView):
         serializer = ProfileSerializer(queryset, many=True)
         return Response(serializer.data)
 
+    # TODO: 이메일 전송이 실패하면 생성된 유저도 무효시키도록 트렌젝션 필요
     def post(self, request, *args, **kwargs):
         """
         {
@@ -56,7 +60,7 @@ class CreateProfileView(APIView):
             })
         else:
             return Response({
-                'response': 'success',
+                'response': 'error',
                 'message': '이메일을 전송에 실패하였습니다.'
             })
 
@@ -70,7 +74,7 @@ def login_test(request):
 def send_email_for_active(profile, request):
 
     # 프론트, 백앤드 서버가 나뉘어 있어서 current_site가 의미가 없다.
-    #current_site = get_current_site(request)
+    # current_site = get_current_site(request)
     message = render_to_string(
         'core/email_for_active.html',
         {
@@ -132,3 +136,30 @@ def user_active(request):
         'response': 'success',
         'message': f'{profile}이 활성화 되었습니다.'
     })
+
+
+@api_view(['GET'])
+@permission_classes([MyIsAuthenticated, ])
+def jorang_create(request):
+    token = request.META['HTTP_AUTHORIZATION'].split()[1]
+    decoded_payload = jwt_decode_handler(token)
+    email = decoded_payload['email']
+    User = get_user_model()
+    profile = User.objects.get(email=email)
+    if profile.last_login is None:
+        print("good")
+    breakpoint()
+
+
+class MyObtainJSONWebToken(ObtainJSONWebToken):
+    def post(self, request):
+        response = super().post(request, content_type='application/json')
+        User = get_user_model()
+        email = request.data.get('email', '')
+        profile = User.objects.get(email=email)
+        update_last_login(None, profile)
+
+        return Response({
+            'response': 'success',
+            'message': response.data['token']
+        })
