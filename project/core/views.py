@@ -27,10 +27,8 @@ class CreateProfileView(APIView):
         """
         {
             "profile": {
-                "username": "rkdalstjd9",
-                "password": "qwe123",
                 "email": "rkdalstjd9@naver.com",
-                "nickname": "arkss"
+                "password": "qwe123"
             }
         }
         """
@@ -49,10 +47,18 @@ class CreateProfileView(APIView):
                 'message': serializer.errors
             })
 
-        return Response({
-            'response': 'success',
-            'message': serializer.data
-        })
+        email_result = send_email_for_active(profile, request)
+
+        if email_result:
+            return Response({
+                'response': 'success',
+                'message': '이메일을 전송하였습니다.'
+            })
+        else:
+            return Response({
+                'response': 'success',
+                'message': '이메일을 전송에 실패하였습니다.'
+            })
 
 
 @api_view(['GET'])
@@ -61,29 +67,8 @@ def login_test(request):
     return Response({'message': '로그인 성공'})
 
 
-@api_view(['POST'])
-@permission_classes([AllowAny, ])
-def send_email_for_active(request):
-    """
-    {
-        'username': 'rkdalstjd9'
-    }
-    """
-    username = request.data.get('username')
-    if not username:
-        return Response({
-            'response': 'error',
-            'message': 'username 파라미터가 없습니다.'
-        })
+def send_email_for_active(profile, request):
 
-    User = get_user_model()
-    try:
-        profile = User.objects.get(username=username)
-    except:
-        return Response({
-            'response': 'error',
-            'message': f'{username}이 존재하지 않습니다.'
-        })
     # 프론트, 백앤드 서버가 나뉘어 있어서 current_site가 의미가 없다.
     #current_site = get_current_site(request)
     message = render_to_string(
@@ -103,16 +88,7 @@ def send_email_for_active(request):
         to=[user_email]
     )
     email_result = email.send()
-    if email_result:
-        return Response({
-            'response': 'success',
-            'message': '메일 전송에 성공하였습니다.'
-        })
-    else:
-        return Response({
-            'response': 'error',
-            'message': '메일 전송에 실패하였습니다.'
-        })
+    return email_result
 
 
 @api_view(['POST'])
