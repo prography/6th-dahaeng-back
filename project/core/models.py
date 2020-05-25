@@ -58,6 +58,10 @@ class Profile(AbstractBaseUser, PermissionsMixin):
     def is_superuser(self):
         return self.role == '10'
 
+    @property
+    def is_active(self):
+        return self.status == '1'
+
     USERNAME_FIELD = 'email'
     #REQUIRED_FIELDS = ['nickname']
 
