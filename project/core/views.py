@@ -152,6 +152,7 @@ def jorang_create(request):
 
 
 class MyObtainJSONWebToken(ObtainJSONWebToken):
+    # TODO: error handling
     def post(self, request):
         response = super().post(request, content_type='application/json')
         User = get_user_model()
