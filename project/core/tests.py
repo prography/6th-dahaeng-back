@@ -5,8 +5,6 @@ from django.urls import reverse
 from django.contrib.auth import get_user_model
 from unittest import skip
 
-# Using the standard RequestFactory API to create a form POST request
-
 
 class CreateProfileTest(TestCase):
 
