@@ -68,8 +68,14 @@ class PostCreateView(APIView):
         serializer = PostSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                "response": "success", 
+                "message": "성공적으로 일기를 업로드하였습니다."
+                }, status=status.HTTP_201_CREATED)
+        return Response({
+            "response": "error",
+            "message": serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 class PostDetail(APIView):
     """
@@ -92,6 +98,8 @@ class PostDetail(APIView):
     # 같은 날짜에만 수정할 수 있도록 구현하기!!
     def put(self, request, pk, format=None):
         post = self.get_object(pk)
+        data = request.data
+        data['profile'] = request.user.email
         serializer = PostSerializer(post, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -102,30 +110,3 @@ class PostDetail(APIView):
         post = self.get_object(pk)
         post.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-# TODO
-# permission_classes = [IsAdminUser, ]
-# 행복 질문 뷰
-class QuestionList(APIView):
-    """
-    List all happy-questions, or create a new happy-question
-    """
-    permission_classes = [AllowAny, ]
-
-    def get(self, request, format=None):
-        questions = Question.objects.all()
-        serializer = QuestionSerializer(questions, many=True)
-        return Response(serializer.data)
-
-    def post(self, request, format=None):
-        '''
-        {
-	        "question": "4번 질문"
-        }
-        '''
-        serializer = QuestionSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
