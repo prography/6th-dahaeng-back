@@ -17,10 +17,6 @@ from django.http import Http404
 # random happy-question
 import random
 
-# Restrict the post to be updated only on the day.
-#from datetime import datetime
-#from django.utils import timezone
-
 def pick_number():
     count = Question.objects.all().count()
     if count < 1:
@@ -52,19 +48,13 @@ class PostCreateView(APIView):
         question = Question.objects.all().filter(id = qid)
         serializer = QuestionSerializer(question, many=True)
         response = Response(serializer.data, status=status.HTTP_201_CREATED)
-        #response.set_cookie('my_question', qid)
+        response.set_cookie('my_question', qid)
         return response
     
     def post(self, request):
-        '''
-        {
-            "question": "question 예제 - 수동으로 입력",
-            "detail": "일기 내용"
-        }
-        '''
         data = request.data
         data['profile'] = request.user.email
-        #data['question'] = request.COOKIES.get('my_question')
+        data['question'] = request.COOKIES.get('my_question')
         serializer = PostSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
@@ -94,8 +84,6 @@ class PostDetail(APIView):
         serializer = PostSerializer(post)
         return Response(serializer.data)
     
-    # TODO
-    # 같은 날짜에만 수정할 수 있도록 구현하기!!
     def put(self, request, pk, format=None):
         post = self.get_object(pk)
         data = request.data
@@ -113,3 +101,23 @@ class PostDetail(APIView):
         post = self.get_object(pk)
         post.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+# TODO
+# permission_classes = [IsAdminUser, ]
+class QuestionList(APIView):
+    permission_classes = [AllowAny, ]
+
+    def get(self, request, format=None):
+        questions = Question.objects.all()
+        serializer = QuestionSerializer(questions, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        serializer = QuestionSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                "response": "success",
+                "message": "성공적으로 질문을 업로드하였습니다."
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
