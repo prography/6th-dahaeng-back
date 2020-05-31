@@ -39,10 +39,6 @@ class PostList(ListAPIView):
 class PostCreateView(APIView):
     permission_classes = [AllowAny, ]
     
-    # TODO
-    # 자정 기준으로 바꿔주기 (현재 60초)
-    @method_decorator(cache_page(60))
-    #@method_decorator(vary_on_cookie)
     def get(self, request):
         qid = pick_number()
         question = Question.objects.all().filter(id = qid)
@@ -84,18 +80,18 @@ class PostDetail(APIView):
         serializer = PostSerializer(post)
         return Response(serializer.data)
     
-    def put(self, request, pk, format=None):
+    def patch(self, request, pk, format=None):
         post = self.get_object(pk)
-        data = request.data
-        data['profile'] = request.user.email
-        serializer = PostSerializer(post, data=request.data)
+        serializer = PostSerializer(post, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({
                 "response": "success", 
-                "message": serializer.data
-                })
-        return Response(serializer.error, status=status.HTTP_400_BAD_REQUEST)
+                "message": "성공적으로 수정하였습니다."})
+        return Response({
+            "response": "error", 
+            "message" : serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, format=None):
         post = self.get_object(pk)
