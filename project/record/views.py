@@ -1,15 +1,12 @@
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
-#from django.views.decorators.vary import vary_on_cookie
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework import status
 
-from .models import Post, Question
-from .serializers import PostSerializer, QuestionSerializer
-from .filters import DynamicSearchFilter
+from record.models import Post, Question
+from record.serializers import PostSerializer, QuestionSerializer
+from record.filters import DynamicSearchFilter
 from config.permissions import MyIsAuthenticated
 
 from django.http import Http404

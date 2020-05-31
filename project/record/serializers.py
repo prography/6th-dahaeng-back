@@ -1,8 +1,8 @@
 from rest_framework import serializers as sz
 from record.models import Post, Question
 from core.models import Profile
-
 from record.relations import QuestionRelatedField
+
 from datetime import date
 
 class QuestionSerializer(sz.ModelSerializer):
