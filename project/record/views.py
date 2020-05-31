@@ -1,25 +1,18 @@
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
-#from django.views.decorators.vary import vary_on_cookie
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework import status
 
-from .models import Post, Question
-from .serializers import PostSerializer, QuestionSerializer
-from .filters import DynamicSearchFilter
+from record.models import Post, Question
+from record.serializers import PostSerializer, QuestionSerializer
+from record.filters import DynamicSearchFilter
 from config.permissions import MyIsAuthenticated
 
 from django.http import Http404
 
 # random happy-question
 import random
-
-# Restrict the post to be updated only on the day.
-#from datetime import datetime
-#from django.utils import timezone
 
 def pick_number():
     count = Question.objects.all().count()
@@ -43,28 +36,18 @@ class PostList(ListAPIView):
 class PostCreateView(APIView):
     permission_classes = [AllowAny, ]
     
-    # TODO
-    # 자정 기준으로 바꿔주기 (현재 60초)
-    @method_decorator(cache_page(60))
-    #@method_decorator(vary_on_cookie)
     def get(self, request):
         qid = pick_number()
         question = Question.objects.all().filter(id = qid)
         serializer = QuestionSerializer(question, many=True)
         response = Response(serializer.data, status=status.HTTP_201_CREATED)
-        #response.set_cookie('my_question', qid)
+        response.set_cookie('my_question', qid)
         return response
     
     def post(self, request):
-        '''
-        {
-            "question": "question 예제 - 수동으로 입력",
-            "detail": "일기 내용"
-        }
-        '''
         data = request.data
         data['profile'] = request.user.email
-        #data['question'] = request.COOKIES.get('my_question')
+        data['question'] = request.COOKIES.get('my_question')
         serializer = PostSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
@@ -94,22 +77,40 @@ class PostDetail(APIView):
         serializer = PostSerializer(post)
         return Response(serializer.data)
     
-    # TODO
-    # 같은 날짜에만 수정할 수 있도록 구현하기!!
-    def put(self, request, pk, format=None):
+    def patch(self, request, pk, format=None):
         post = self.get_object(pk)
-        data = request.data
-        data['profile'] = request.user.email
-        serializer = PostSerializer(post, data=request.data)
+        serializer = PostSerializer(post, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({
                 "response": "success", 
-                "message": serializer.data
-                })
-        return Response(serializer.error, status=status.HTTP_400_BAD_REQUEST)
+                "message": "성공적으로 수정하였습니다."})
+        return Response({
+            "response": "error", 
+            "message" : serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, format=None):
         post = self.get_object(pk)
         post.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+# TODO
+# permission_classes = [IsAdminUser, ]
+class QuestionList(APIView):
+    permission_classes = [AllowAny, ]
+
+    def get(self, request, format=None):
+        questions = Question.objects.all()
+        serializer = QuestionSerializer(questions, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        serializer = QuestionSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                "response": "success",
+                "message": "성공적으로 질문을 업로드하였습니다."
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

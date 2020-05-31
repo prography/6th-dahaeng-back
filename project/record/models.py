@@ -3,14 +3,11 @@ from django.utils import timezone
 from core.models import Profile
 
 class Question(models.Model):
-    question = models.CharField(max_length=512, unique=True)
+    content = models.CharField(max_length=512, unique=True)
 
     def __str__(self):
-        return '%s' % (self.question)
+        return self.content
 
-#class Emotion(models.Model):
-    #emoji = models.CharField(max_length=50)
-    
 class Post(models.Model):
     EMOTION_CHOICES = [
         ('WARM',      "따뜻했어요"), 
@@ -22,9 +19,9 @@ class Post(models.Model):
 
     created_at = models.DateField(auto_now_add=True)
     emotion = models.CharField(max_length=10, choices=EMOTION_CHOICES, default="WARM")
-    question = models.CharField(max_length=512, blank=False)
+    question = models.ForeignKey(Question, on_delete=models.SET_NULL, null=True)
     detail = models.TextField(blank=True)
-    profile = models.ForeignKey(Profile, related_name='posts', on_delete=models.CASCADE)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ('created_at', 'profile')
