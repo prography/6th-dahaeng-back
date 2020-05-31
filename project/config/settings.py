@@ -1,6 +1,7 @@
 import json
 import os
 from os.path import abspath, dirname, join
+from django.core.exceptions import ImproperlyConfigured
 import datetime
 
 
