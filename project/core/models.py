@@ -72,3 +72,5 @@ class Profile(AbstractBaseUser, PermissionsMixin):
 class Jorang(models.Model):
     nickname = models.CharField(max_length=50)
     color = models.CharField(max_length=6, help_text='16진수 코드 6개 ex) FFFFFF')
+    profile = models.OneToOneField(
+        Profile, null=True, on_delete=models.CASCADE)
