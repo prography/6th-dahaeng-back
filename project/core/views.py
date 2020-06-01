@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import update_last_login
 from config.permissions import MyIsAuthenticated
 from .serializers import ProfileSerializer
+from .models import Jorang
 
 # email
 from django.contrib.sites.shortcuts import get_current_site
@@ -138,29 +139,57 @@ def user_active(request):
     })
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 @permission_classes([MyIsAuthenticated, ])
 def jorang_create(request):
+    """
+    {
+        "nickname": "산림수",
+        "color": "000000"
+    }
+    """
     token = request.META['HTTP_AUTHORIZATION'].split()[1]
+    try:
+        nickname = request.data['nickname']
+        color = request.data['color']
+    except KeyError:
+        return Response({
+            'response': 'error',
+            'message': 'request body의 파라미터가 잘못되었습니다.'
+        })
     decoded_payload = jwt_decode_handler(token)
     email = decoded_payload['email']
     User = get_user_model()
     profile = User.objects.get(email=email)
-    if profile.last_login is None:
-        print("good")
-    breakpoint()
+    Jorang.objects.create(
+        nickname=nickname,
+        color=color,
+        profile=profile
+    )
+
+    return Response({
+        'response': 'success',
+        'message': 'Jorang이 성공적으로 생성되었습니다.'
+    })
 
 
 class MyObtainJSONWebToken(ObtainJSONWebToken):
     # TODO: error handling
     def post(self, request):
         response = super().post(request, content_type='application/json')
+        is_first_login = False
         User = get_user_model()
         email = request.data.get('email', '')
         profile = User.objects.get(email=email)
+        if profile.last_login is None:
+            is_first_login = True
+
         update_last_login(None, profile)
 
         return Response({
             'response': 'success',
-            'message': response.data['token']
+            'message': {
+                'token': response.data['token'],
+                'is_first_login': is_first_login
+            }
         })
