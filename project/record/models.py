@@ -1,6 +1,5 @@
 import os
 from uuid import uuid4
-from django.utils import timezone
 from django.db import models
 from django.utils import timezone
 from core.models import Profile
