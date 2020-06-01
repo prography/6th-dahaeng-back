@@ -13,8 +13,6 @@ class ProfileSerializer(sz.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = [
-            'username',
             'password',
-            'email',
-            'nickname'
+            'email'
         ]
