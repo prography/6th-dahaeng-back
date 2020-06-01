@@ -130,8 +130,9 @@ AUTH_USER_MODEL = "core.Profile"
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
+        'config.permissions.MyIsAuthenticated',
         'rest_framework.permssions.IsAdminUser',
+        # 'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',

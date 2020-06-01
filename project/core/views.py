@@ -2,9 +2,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view, permission_classes
-from .serializers import ProfileSerializer
+from rest_framework_jwt.utils import jwt_decode_handler
+from rest_framework_jwt.views import ObtainJSONWebToken
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import update_last_login
 from config.permissions import MyIsAuthenticated
+from .serializers import ProfileSerializer
+from .models import Jorang
 
 # email
 from django.contrib.sites.shortcuts import get_current_site
@@ -23,14 +27,13 @@ class CreateProfileView(APIView):
         serializer = ProfileSerializer(queryset, many=True)
         return Response(serializer.data)
 
+    # TODO: 이메일 전송이 실패하면 생성된 유저도 무효시키도록 트렌젝션 필요
     def post(self, request, *args, **kwargs):
         """
         {
             "profile": {
-                "username": "rkdalstjd9",
-                "password": "qwe123",
                 "email": "rkdalstjd9@naver.com",
-                "nickname": "arkss"
+                "password": "qwe123"
             }
         }
         """
@@ -49,10 +52,18 @@ class CreateProfileView(APIView):
                 'message': serializer.errors
             })
 
-        return Response({
-            'response': 'success',
-            'message': serializer.data
-        })
+        email_result = send_email_for_active(profile, request)
+
+        if email_result:
+            return Response({
+                'response': 'success',
+                'message': '이메일을 전송하였습니다.'
+            })
+        else:
+            return Response({
+                'response': 'error',
+                'message': '이메일을 전송에 실패하였습니다.'
+            })
 
 
 @api_view(['GET'])
@@ -61,31 +72,10 @@ def login_test(request):
     return Response({'message': '로그인 성공'})
 
 
-@api_view(['POST'])
-@permission_classes([AllowAny, ])
-def send_email_for_active(request):
-    """
-    {
-        'username': 'rkdalstjd9'
-    }
-    """
-    username = request.data.get('username')
-    if not username:
-        return Response({
-            'response': 'error',
-            'message': 'username 파라미터가 없습니다.'
-        })
+def send_email_for_active(profile, request):
 
-    User = get_user_model()
-    try:
-        profile = User.objects.get(username=username)
-    except:
-        return Response({
-            'response': 'error',
-            'message': f'{username}이 존재하지 않습니다.'
-        })
     # 프론트, 백앤드 서버가 나뉘어 있어서 current_site가 의미가 없다.
-    #current_site = get_current_site(request)
+    # current_site = get_current_site(request)
     message = render_to_string(
         'core/email_for_active.html',
         {
@@ -103,16 +93,7 @@ def send_email_for_active(request):
         to=[user_email]
     )
     email_result = email.send()
-    if email_result:
-        return Response({
-            'response': 'success',
-            'message': '메일 전송에 성공하였습니다.'
-        })
-    else:
-        return Response({
-            'response': 'error',
-            'message': '메일 전송에 실패하였습니다.'
-        })
+    return email_result
 
 
 @api_view(['POST'])
@@ -156,3 +137,59 @@ def user_active(request):
         'response': 'success',
         'message': f'{profile}이 활성화 되었습니다.'
     })
+
+
+@api_view(['POST'])
+@permission_classes([MyIsAuthenticated, ])
+def jorang_create(request):
+    """
+    {
+        "nickname": "산림수",
+        "color": "000000"
+    }
+    """
+    token = request.META['HTTP_AUTHORIZATION'].split()[1]
+    try:
+        nickname = request.data['nickname']
+        color = request.data['color']
+    except KeyError:
+        return Response({
+            'response': 'error',
+            'message': 'request body의 파라미터가 잘못되었습니다.'
+        })
+    decoded_payload = jwt_decode_handler(token)
+    email = decoded_payload['email']
+    User = get_user_model()
+    profile = User.objects.get(email=email)
+    Jorang.objects.create(
+        nickname=nickname,
+        color=color,
+        profile=profile
+    )
+
+    return Response({
+        'response': 'success',
+        'message': 'Jorang이 성공적으로 생성되었습니다.'
+    })
+
+
+class MyObtainJSONWebToken(ObtainJSONWebToken):
+    # TODO: error handling
+    def post(self, request):
+        response = super().post(request, content_type='application/json')
+        is_first_login = False
+        User = get_user_model()
+        email = request.data.get('email', '')
+        profile = User.objects.get(email=email)
+        if profile.last_login is None:
+            is_first_login = True
+
+        update_last_login(None, profile)
+
+        return Response({
+            'response': 'success',
+            'message': {
+                'token': response.data['token'],
+                'is_first_login': is_first_login
+            }
+        })
