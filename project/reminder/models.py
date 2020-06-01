@@ -3,7 +3,7 @@ from django.db import models
 
 
 class Reminder(models.Model):
-    post = models.OneToOneField(Post, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
     interval = models.IntegerField()
     created_at = models.DateField(auto_now_add=True)
 
