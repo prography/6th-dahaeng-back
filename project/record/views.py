@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 
 from record.models import Post, Question
@@ -35,6 +36,7 @@ class PostList(ListAPIView):
 
 class PostCreateView(APIView):
     permission_classes = [AllowAny, ]
+    parser_classes = (FormParser, MultiPartParser,)
     
     def get(self, request):
         qid = pick_number()
