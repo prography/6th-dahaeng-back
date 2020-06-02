@@ -5,8 +5,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 
-from record.models import Post, Question
-from record.serializers import PostSerializer, QuestionSerializer
+from record.models import Post, Question, UserQuestion
+from record.serializers import PostSerializer, QuestionSerializer, UserQuestionSerializer
 from record.filters import DynamicSearchFilter
 from config.permissions import MyIsAuthenticated
 
@@ -39,17 +39,19 @@ class PostCreateView(APIView):
     parser_classes = (FormParser, MultiPartParser,)
     
     def get(self, request):
-        qid = pick_number()
-        question = Question.objects.all().filter(id = qid)
-        serializer = QuestionSerializer(question, many=True)
+        question = UserQuestion.objects.filter(profile=request.user.pk)
+        serializer = UserQuestionSerializer(question, many=True)
         response = Response(serializer.data, status=status.HTTP_201_CREATED)
-        response.set_cookie('my_question', qid)
         return response
     
     def post(self, request):
         data = request.data
+        _mutable = data._mutable
+        data._mutable = True
         data['profile'] = request.user.email
-        data['question'] = request.COOKIES.get('my_question')
+        data['question'] = UserQuestion.objects.get(profile=request.user.pk).question
+        data._mutable = _mutable
+
         serializer = PostSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
