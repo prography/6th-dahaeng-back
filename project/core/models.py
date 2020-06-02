@@ -13,7 +13,8 @@ class UserManager(BaseUserManager):
             email=self.normalize_email(email),
         )
         user.set_password(password)
-        user.status = '0'
+        # TODO: 이메일 인증 잠시 보류
+        user.status = '1'
         user.role = '0'
         user.save(using=self._db)
         return user
