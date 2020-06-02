@@ -9,3 +9,6 @@ class Reminder(models.Model):
 
     def __str__(self):
         return f"{self.post.profile}의 {self.post.created_at} remainder"
+
+    class Meta:
+        unique_together = ('post', 'interval')
