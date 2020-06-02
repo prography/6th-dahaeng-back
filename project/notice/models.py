@@ -9,6 +9,7 @@ class Notice(models.Model):
 
 
 class Read(models.Model):
-    notice = models.OneToOneField(Notice, on_delete=models.CASCADE)
-    profile = models.OneToOneField(Profile, on_delete=models.CASCADE)
+    notice = models.ForeignKey(Notice, on_delete=models.CASCADE)
+    profile = models.OneToOneField(
+        Profile, on_delete=models.CASCADE)
     is_read = models.BooleanField(default=False)
