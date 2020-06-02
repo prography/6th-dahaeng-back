@@ -5,15 +5,18 @@ from rest_framework.permissions import AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 
-from record.models import Post, Question
-from record.serializers import PostSerializer, QuestionSerializer
+from record.models import Post, Question, UserQuestion
+from record.serializers import PostSerializer, QuestionSerializer, UserQuestionSerializer
 from record.filters import DynamicSearchFilter
 from config.permissions import MyIsAuthenticated
 
 from django.http import Http404
+from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
 
 # random happy-question
 import random
+from datetime import date, datetime
 
 def pick_number():
     count = Question.objects.all().count()
@@ -39,17 +42,33 @@ class PostCreateView(APIView):
     parser_classes = (FormParser, MultiPartParser,)
     
     def get(self, request):
-        qid = pick_number()
-        question = Question.objects.all().filter(id = qid)
-        serializer = QuestionSerializer(question, many=True)
-        response = Response(serializer.data, status=status.HTTP_201_CREATED)
-        response.set_cookie('my_question', qid)
-        return response
+        User = get_user_model()
+        email = request.user.email
+        profile = User.objects.get(email=email)
+        userquestion = UserQuestion.objects.get(profile=profile.pk)
+    
+        if userquestion.last_login is None or userquestion.last_login.date() != date.today():
+            qid = pick_number()
+            qobj = get_object_or_404(Question, pk=qid)
+            serializer = UserQuestionSerializer(
+                userquestion,
+                data={"last_login": profile.last_login, "question": qid},
+                partial=True)
+            if serializer.is_valid():
+                serializer.save()
+
+        question = UserQuestion.objects.filter(profile=request.user.pk)
+        sz = UserQuestionSerializer(question, many=True)
+        return Response(sz.data)
     
     def post(self, request):
         data = request.data
+        _mutable = data._mutable
+        data._mutable = True
         data['profile'] = request.user.email
-        data['question'] = request.COOKIES.get('my_question')
+        data['question'] = UserQuestion.objects.get(profile=request.user.pk).question
+        data._mutable = _mutable
+
         serializer = PostSerializer(data=data)
         if serializer.is_valid():
             serializer.save()

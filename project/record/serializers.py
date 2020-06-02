@@ -15,9 +15,8 @@ class QuestionSerializer(sz.ModelSerializer):
 class PostSerializer(sz.ModelSerializer):
     profile = sz.SlugRelatedField(queryset=Profile.objects.all(), slug_field='email',)
     emotion = sz.ChoiceField(choices=Post.EMOTION_CHOICES)
-    question = QuestionRelatedField(queryset=Question.objects.all(), slug_field='id')
-    image = sz.ImageField(use_url=True)
-    
+    question = sz.SlugRelatedField(queryset=Question.objects.all(), slug_field='content')
+
     def create(self, validated_data):
         return Post.objects.create(**validated_data)
     
@@ -43,3 +42,20 @@ class PostSerializer(sz.ModelSerializer):
             'emotion',
             'image',
         ]
+
+class UserQuestionSerializer(sz.ModelSerializer):
+    profile = sz.SlugRelatedField(queryset=Profile.objects.all(), slug_field='email',)
+    question = QuestionRelatedField(queryset=Question.objects.all(), slug_field='id')
+
+    def create(self, validated_data):
+        return UserQuestion.objects.create(**validated_data)
+    
+    def update(self, instance, validated_data):
+        instance.last_login = validated_data.get('last_login', instance.last_login)
+        instance.question = validated_data.get('question', instance.question)
+        instance.save()
+        return instance
+
+    class Meta:
+        model = UserQuestion
+        fields = ('profile', 'last_login', 'question')

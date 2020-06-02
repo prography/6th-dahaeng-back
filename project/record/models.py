@@ -41,3 +41,9 @@ class Post(models.Model):
     class Meta:
         unique_together = ('created_at', 'profile')
         ordering = ('-created_at',)
+
+
+class UserQuestion(models.Model):
+    profile = models.OneToOneField(Profile, on_delete=models.CASCADE)
+    last_login = models.DateTimeField(null=True)
+    question = models.ForeignKey(Question, on_delete=models.SET_NULL, null=True)
