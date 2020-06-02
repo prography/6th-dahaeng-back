@@ -45,5 +45,4 @@ class Post(models.Model):
 
 class UserQuestion(models.Model):
     profile = models.OneToOneField(Profile, on_delete=models.CASCADE)
-    last_login = models.DateTimeField(null=True)
     question = models.ForeignKey(Question, on_delete=models.SET_NULL, null=True)
