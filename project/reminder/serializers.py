@@ -8,10 +8,12 @@ class ReminderSerializer(sz.ModelSerializer):
     posts = sz.SerializerMethodField()
 
     def get_posts(self, obj):
+        post = obj.post
         return {
-            'emotion': obj.post.emotion,
-            'detail': obj.post.detail,
-            'question': obj.post.question.content
+            'emotion': post.emotion,
+            'detail': post.detail,
+            'question': post.question.content,
+            'image': post.image.url
         }
 
     class Meta:
