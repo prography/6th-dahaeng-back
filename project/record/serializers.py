@@ -1,5 +1,5 @@
 from rest_framework import serializers as sz
-from record.models import Post, Question
+from record.models import Post, Question, UserQuestion
 from core.models import Profile
 from record.relations import QuestionRelatedField
 
