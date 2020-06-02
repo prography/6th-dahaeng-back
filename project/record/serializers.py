@@ -16,6 +16,7 @@ class PostSerializer(sz.ModelSerializer):
     profile = sz.SlugRelatedField(queryset=Profile.objects.all(), slug_field='email',)
     emotion = sz.ChoiceField(choices=Post.EMOTION_CHOICES)
     question = QuestionRelatedField(queryset=Question.objects.all(), slug_field='id')
+    image = sz.ImageField(use_url=True)
     
     def create(self, validated_data):
         return Post.objects.create(**validated_data)
@@ -40,4 +41,5 @@ class PostSerializer(sz.ModelSerializer):
             'detail', 
             'profile', 
             'emotion',
+            'image',
         ]
