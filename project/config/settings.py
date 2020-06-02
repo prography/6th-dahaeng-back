@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'core',
     'six',
     'record',
+    'reminder',
 ]
 
 MIDDLEWARE = [
@@ -131,7 +132,7 @@ AUTH_USER_MODEL = "core.Profile"
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'config.permissions.MyIsAuthenticated',
-        'rest_framework.permssions.IsAdminUser',
+        # 'rest_framework.permssions.IsAdminUser',
         # 'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -158,3 +159,6 @@ EMAIL_HOST_USER = get_secret('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = get_secret('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = get_secret('EMAIL_PORT')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
