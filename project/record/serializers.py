@@ -47,12 +47,11 @@ class PostSerializer(sz.ModelSerializer):
 class UserQuestionSerializer(sz.ModelSerializer):
     profile = sz.SlugRelatedField(queryset=Profile.objects.all(), slug_field='email',)
     question = QuestionRelatedField(queryset=Question.objects.all(), slug_field='id')
-    
+
     def create(self, validated_data):
-        return UserQuestion.objects.reate(**validated_data)
+        return UserQuestion.objects.create(**validated_data)
     
     def update(self, instance, validated_data):
-        instance.profile = validated_data.get('profile', instance.profile)
         instance.last_login = validated_data.get('last_login', instance.last_login)
         instance.question = validated_data.get('question', instance.question)
         instance.save()
