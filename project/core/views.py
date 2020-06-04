@@ -181,15 +181,28 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
         User = get_user_model()
         email = request.data.get('email', '')
         profile = User.objects.get(email=email)
+
         if profile.last_login is None:
             is_first_login = True
 
         update_last_login(None, profile)
 
+        try:
+            jorang = Jorang.objects.get(profile=profile)
+            jorang_nickname = jorang.nickname
+            jorang_color = jorang.color
+        except ObjectDoesNotExist:
+            jorang_nickname = None
+            jorang_color = None
+
         return Response({
             'response': 'success',
             'message': {
                 'token': response.data['token'],
-                'is_first_login': is_first_login
+                'is_first_login': is_first_login,
+                'jorang': {
+                    'nickname': jorang_nickname,
+                    'color': jorang_color
+                }
             }
         })
