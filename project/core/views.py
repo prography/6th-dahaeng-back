@@ -9,6 +9,10 @@ from django.contrib.auth.models import update_last_login
 from config.permissions import MyIsAuthenticated
 from .serializers import ProfileSerializer
 from .models import Jorang
+from record.models import Question, UserQuestion
+from record.serializers import UserQuestionSerializer
+
+from random import randint
 
 # email
 from django.contrib.sites.shortcuts import get_current_site
@@ -192,6 +196,14 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
 
         if profile.last_login is None:
             is_first_login = True
+            serializer = UserQuestionSerializer(data={"profile": email}, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+        else:
+            userq = UserQuestion.objects.get(profile=profile.id)
+            serializer = UserQuestionSerializer(userq, data={"last_login": profile.last_login}, partial=True)
+            if serializer.is_valid():
+                serializer.save()
 
         try:
             jorang = Jorang.objects.get(profile=profile)
