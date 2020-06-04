@@ -52,6 +52,13 @@ class CreateProfileView(APIView):
                 'message': serializer.errors
             })
 
+        return Response({
+            'response': 'success',
+            'message': '회원가입이 완료되었습니다.'
+        })
+
+        # TODO: milestone2
+        """
         email_result = send_email_for_active(profile, request)
 
         if email_result:
@@ -64,6 +71,7 @@ class CreateProfileView(APIView):
                 'response': 'error',
                 'message': '이메일을 전송에 실패하였습니다.'
             })
+        """
 
 
 @api_view(['GET'])
@@ -185,15 +193,15 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
         if profile.last_login is None:
             is_first_login = True
 
-        update_last_login(None, profile)
-
         try:
             jorang = Jorang.objects.get(profile=profile)
             jorang_nickname = jorang.nickname
             jorang_color = jorang.color
-        except ObjectDoesNotExist:
+        except Jorang.DoesNotExist:
             jorang_nickname = None
             jorang_color = None
+
+        update_last_login(None, profile)
 
         return Response({
             'response': 'success',
