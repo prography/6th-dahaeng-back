@@ -1,7 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 
@@ -24,13 +23,11 @@ def pick_number():
         return 0
     return random.randint(1, count)
 
-# TODO
-# permission_classes = [MyIsAuthenticated, ]
 class PostList(ListAPIView):
     """
     List all happy-record of a now-user
     """
-    permission_classes = [AllowAny, ]
+    permission_classes = [MyIsAuthenticated, ]
     serializer_class = PostSerializer
     filter_backends = (DynamicSearchFilter, )
 
@@ -38,7 +35,7 @@ class PostList(ListAPIView):
         return Post.objects.all().filter(profile=self.request.user.pk)
 
 class PostCreateView(APIView):
-    permission_classes = [AllowAny, ]
+    permission_classes = [MyIsAuthenticated, ]
     parser_classes = (FormParser, MultiPartParser,)
     
     def get(self, request):
@@ -47,12 +44,12 @@ class PostCreateView(APIView):
         profile = User.objects.get(email=email)
         userquestion = UserQuestion.objects.get(profile=profile.pk)
     
-        if userquestion.last_login is None or userquestion.last_login.date() != date.today():
+        if userquestion.last_login is None or userquestion.last_login != date.today():
             qid = pick_number()
             qobj = get_object_or_404(Question, pk=qid)
             serializer = UserQuestionSerializer(
                 userquestion,
-                data={"last_login": profile.last_login, "question": qid},
+                data={"last_login": date.today(), "question": qid},
                 partial=True)
             if serializer.is_valid():
                 serializer.save()
@@ -85,7 +82,7 @@ class PostDetail(APIView):
     """
     Retrieve a happy-record instance for a specific date
     """
-    permission_classes = [AllowAny, ]
+    permission_classes = [MyIsAuthenticated, ]
     
     def get_object(self, pk):
         try:
@@ -119,7 +116,7 @@ class PostDetail(APIView):
 # TODO
 # permission_classes = [IsAdminUser, ]
 class QuestionList(APIView):
-    permission_classes = [AllowAny, ]
+    permission_classes = [MyIsAuthenticated, ]
 
     def get(self, request, format=None):
         questions = Question.objects.all()
