@@ -166,7 +166,6 @@ def jorang_create(request):
     """
     try:
         nickname = request.data['nickname']
-        color = request.data['color']
     except KeyError:
         return Response({
             'response': 'error',
@@ -235,3 +234,10 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
                 }
             }
         })
+
+
+def get_or_none(classmodel, **kwargs):
+    try:
+        return classmodel.objects.get(**kwargs)
+    except classmodel.DoesNotExist:
+        return None
