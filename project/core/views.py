@@ -196,7 +196,13 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
         is_first_login = False
         User = get_user_model()
         email = request.data.get('email', '')
-        profile = User.objects.get(email=email)
+        try:
+            profile = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({
+                'response': 'error',
+                'message': '유효하지않은 계정입니다.'
+            })
 
         if profile.last_login is None:
             is_first_login = True
