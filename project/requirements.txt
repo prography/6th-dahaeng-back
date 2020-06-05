@@ -3,3 +3,5 @@ djangorestframework==3.11.0
 djangorestframework-jwt==1.11.0
 six==1.14.0
 Pillow==7.1.2
+boto3==1.13.20
+django-storages==1.9.1
