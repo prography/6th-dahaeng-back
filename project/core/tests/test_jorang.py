@@ -2,15 +2,18 @@ from rest_framework.test import APITestCase, APIClient
 import json
 from django.urls import reverse
 from django.contrib.auth import get_user_model
+from ..models import Jorang
+from ..views import get_or_none
 from unittest import skip
 
 
 class JorangTestCase(APITestCase):
     def setUp(self):
-<<<<<<< HEAD
+        self.email = "rkdalstjd9@naver.com"
+        self.password = "qwe123"
         profile = get_user_model().objects.create_user(
-            email="rkdalstjd9@naver.com",
-            password="qwe123"
+            email=self.email,
+            password=self.password
         )
 
     @skip
@@ -19,24 +22,52 @@ class JorangTestCase(APITestCase):
         result = self.client.force_authenticate(user=profile)
         breakpoint()
 
-    # @skip
     def test_check_has_jorang(self):
+        profile = get_user_model().objects.get(email=self.email)
+        Jorang.objects.create(
+            nickname="조랭이 이름",
+            color="000000",
+            profile=profile
+        )
+        jorang = get_or_none(Jorang, profile=profile)
+        if jorang is None:
+            has_jorang = False
+        else:
+            has_jorang = True
+
         url = reverse("login")
         data = {
             "email": "rkdalstjd9@naver.com",
             "password": "qwe123"
         }
         response = self.client.post(url, data, format='json')
-        breakpoint()
+        self.assertEqual(response.data['message']['has_jorang'], has_jorang)
 
-    @skip
-    def test_jorang_create(self):
+    def test_check_has_not_jorang(self):
+        profile = get_user_model().objects.get(email=self.email)
+        jorang = get_or_none(Jorang, profile=profile)
+        if jorang is None:
+            has_jorang = False
+        else:
+            has_jorang = True
+
+        url = reverse("login")
+        data = {
+            "email": "rkdalstjd9@naver.com",
+            "password": "qwe123"
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.data['message']['has_jorang'], has_jorang)
+
+    def test_create_jorang(self):
+        profile = get_user_model().objects.get(email=self.email)
+        self.client.force_authenticate(user=profile)
         url = reverse("jorang_create")
         data = {
             "nickname": "산림수"
         }
         response = self.client.post(url, data)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["response"], "success")
 
     @skip
     def test_api_jwt(self):
@@ -77,17 +108,3 @@ class JorangTestCase(APITestCase):
         client.credentials(HTTP_AUTHORIZATION='JWT ' + token)
         resp = client.get('/api/v1/account/', data={'format': 'json'})
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-=======
-        email = "rkdalstjd9@naver.com"
-        password = "qwe123"
-        profile = get_user_model().objects.create_user(
-            email=email,
-            password=password
-        )
-
-    def test_create_jorang(self):
-        self.client.login(email=self.email, password=self.password)
-        url = reverse("jorang_create")
-        response = self.client.post(url, data)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
->>>>>>> features/Authentication
