@@ -196,20 +196,24 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
 
         if profile.last_login is None:
             is_first_login = True
-            serializer = UserQuestionSerializer(data={"profile": email}, partial=True)
+            serializer = UserQuestionSerializer(
+                data={"profile": email}, partial=True)
             if serializer.is_valid():
                 serializer.save()
         else:
             userq = UserQuestion.objects.get(profile=profile.id)
-            serializer = UserQuestionSerializer(userq, data={"last_login": profile.last_login}, partial=True)
+            serializer = UserQuestionSerializer(
+                userq, data={"last_login": profile.last_login}, partial=True)
             if serializer.is_valid():
                 serializer.save()
 
         try:
             jorang = Jorang.objects.get(profile=profile)
+            has_jorang = True
             jorang_nickname = jorang.nickname
             jorang_color = jorang.color
         except Jorang.DoesNotExist:
+            has_jorang = False
             jorang_nickname = None
             jorang_color = None
 
@@ -219,7 +223,7 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
             'response': 'success',
             'message': {
                 'token': response.data['token'],
-                'is_first_login': is_first_login,
+                'has_jorang': has_jorang,
                 'jorang': {
                     'nickname': jorang_nickname,
                     'color': jorang_color
