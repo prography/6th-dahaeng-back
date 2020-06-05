@@ -7,6 +7,7 @@ from unittest import skip
 
 class JorangTestCase(APITestCase):
     def setUp(self):
+<<<<<<< HEAD
         profile = get_user_model().objects.create_user(
             email="rkdalstjd9@naver.com",
             password="qwe123"
@@ -76,3 +77,17 @@ class JorangTestCase(APITestCase):
         client.credentials(HTTP_AUTHORIZATION='JWT ' + token)
         resp = client.get('/api/v1/account/', data={'format': 'json'})
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
+=======
+        email = "rkdalstjd9@naver.com"
+        password = "qwe123"
+        profile = get_user_model().objects.create_user(
+            email=email,
+            password=password
+        )
+
+    def test_create_jorang(self):
+        self.client.login(email=self.email, password=self.password)
+        url = reverse("jorang_create")
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+>>>>>>> features/Authentication

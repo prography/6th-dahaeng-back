@@ -214,9 +214,11 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
 
         try:
             jorang = Jorang.objects.get(profile=profile)
+            has_jorang = True
             jorang_nickname = jorang.nickname
             jorang_color = jorang.color
         except Jorang.DoesNotExist:
+            has_jorang = False
             jorang_nickname = None
             jorang_color = None
 
@@ -226,7 +228,7 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
             'response': 'success',
             'message': {
                 'token': response.data['token'],
-                'is_first_login': is_first_login,
+                'has_jorang': has_jorang,
                 'jorang': {
                     'nickname': jorang_nickname,
                     'color': jorang_color
