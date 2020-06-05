@@ -44,7 +44,7 @@ class PostCreateView(APIView):
         profile = User.objects.get(email=email)
         userquestion = UserQuestion.objects.get(profile=profile.pk)
     
-        if userquestion.last_login is None or userquestion.last_login != date.today():
+        if userquestion.last_login is None or userquestion.last_login != date.today() or userquestion.question is None:
             qid = pick_number()
             qobj = get_object_or_404(Question, pk=qid)
             serializer = UserQuestionSerializer(
