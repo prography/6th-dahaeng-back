@@ -22,6 +22,7 @@ from django.utils.encoding import force_bytes, force_text
 from .tokens import account_activation_token
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
+from datetime import date
 
 class CreateProfileView(APIView):
     permission_classes = [AllowAny]
@@ -213,7 +214,7 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
         else:
             userq = UserQuestion.objects.get(profile=profile.id)
             serializer = UserQuestionSerializer(
-                userq, data={"last_login": profile.last_login}, partial=True)
+                userq, data={"last_login": date.today()}, partial=True)
             if serializer.is_valid():
                 serializer.save()
 
