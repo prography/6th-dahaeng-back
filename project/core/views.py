@@ -11,8 +11,8 @@ from .serializers import ProfileSerializer
 from .models import Jorang
 from record.models import Question, UserQuestion
 from record.serializers import UserQuestionSerializer
+from random import choice
 
-from random import randint
 
 # email
 from django.contrib.sites.shortcuts import get_current_site
@@ -151,31 +151,30 @@ def user_active(request):
     })
 
 
+def random_color():
+    colors = ["FFE884", "FC9285", "8BAAD8", "F4E9DC", "BD97B4"]
+    return choice(colors)
+
+
 @api_view(['POST'])
 @permission_classes([MyIsAuthenticated, ])
 def jorang_create(request):
     """
     {
-        "nickname": "산림수",
-        "color": "000000"
+        "nickname": "산림수"
     }
     """
-    token = request.META['HTTP_AUTHORIZATION'].split()[1]
     try:
         nickname = request.data['nickname']
-        color = request.data['color']
     except KeyError:
         return Response({
             'response': 'error',
             'message': 'request body의 파라미터가 잘못되었습니다.'
         })
-    decoded_payload = jwt_decode_handler(token)
-    email = decoded_payload['email']
-    User = get_user_model()
-    profile = User.objects.get(email=email)
+    profile = request.user
     Jorang.objects.create(
         nickname=nickname,
-        color=color,
+        color=random_color(),
         profile=profile
     )
 
@@ -189,6 +188,11 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
     # TODO: error handling
     def post(self, request):
         response = super().post(request, content_type='application/json')
+        if response.status_code != 200:
+            return Response({
+                'response': 'error',
+                'message': '로그인이 실패하였습니다.'
+            })
         is_first_login = False
         User = get_user_model()
         email = request.data.get('email', '')
@@ -230,3 +234,10 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
                 }
             }
         })
+
+
+def get_or_none(classmodel, **kwargs):
+    try:
+        return classmodel.objects.get(**kwargs)
+    except classmodel.DoesNotExist:
+        return None

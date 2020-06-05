@@ -1,12 +1,12 @@
 from django.test import TestCase, Client
-from rest_framework.test import APIClient
+from rest_framework.test import APITestCase, APIClient
 import json
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from unittest import skip
 
 
-class PorofileTestCase(TestCase):
+class ProfileTestCase(APITestCase):
 
     def setUp(self):
         self.email = 'rkdalstjd9@naver.com'
@@ -18,13 +18,11 @@ class PorofileTestCase(TestCase):
             }
         }
 
-    @skip
     def test_create_valid_profile(self):
-        client = Client()
-        response = client.post(
-            reverse('signup'),
-            data=json.dumps(self.valid_profile),
-            content_type='application/json'
+        url = reverse('signup')
+        data = self.valid_profile
+        response = self.client.post(
+            url, data, format='json'
         )
         self.assertEqual(
             response.data['response'], 'success'
@@ -65,6 +63,7 @@ class PorofileTestCase(TestCase):
             }
         )
 
+    @skip
     def test_login_with_email_active(self):
         profile = self.create_user()
         profile.status = '1'
