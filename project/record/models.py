@@ -36,7 +36,7 @@ class Post(models.Model):
     detail = models.TextField(blank=True)
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     image = models.ImageField(
-        default='default_image_sample.jpg', upload_to=date_upload_to)
+        default='default_image_sample.jpg', upload_to=date_upload_to, null=True)
 
     class Meta:
         unique_together = ('created_at', 'profile')
@@ -46,4 +46,5 @@ class Post(models.Model):
 class UserQuestion(models.Model):
     profile = models.OneToOneField(Profile, on_delete=models.CASCADE)
     last_login = models.DateTimeField(null=True)
-    question = models.ForeignKey(Question, on_delete=models.SET_NULL, null=True)
+    question = models.ForeignKey(
+        Question, on_delete=models.SET_NULL, null=True)
