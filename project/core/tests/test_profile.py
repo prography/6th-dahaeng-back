@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from unittest import skip
 
 
-class CreateProfileTest(TestCase):
+class ProfileTestCase(TestCase):
 
     def setUp(self):
         self.email = 'rkdalstjd9@naver.com'
@@ -65,6 +65,7 @@ class CreateProfileTest(TestCase):
             }
         )
 
+    @skip
     def test_login_with_email_active(self):
         profile = self.create_user()
         profile.status = '1'
