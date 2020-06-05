@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'core',
     'six',
+    'record',
+    'reminder',
 ]
 
 MIDDLEWARE = [
@@ -112,14 +114,13 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Seoul'
 
 USE_I18N = True
 
 USE_L10N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
@@ -131,6 +132,7 @@ AUTH_USER_MODEL = "core.Profile"
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'config.permissions.MyIsAuthenticated',
+        # 'rest_framework.permssions.IsAdminUser',
         # 'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -157,3 +159,6 @@ EMAIL_HOST_USER = get_secret('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = get_secret('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = get_secret('EMAIL_PORT')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
