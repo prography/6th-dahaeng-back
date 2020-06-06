@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'six',
     'record',
     'reminder',
+    'django_crontab',
 ]
 
 MIDDLEWARE = [
@@ -166,6 +167,12 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+
+CRONJOBS = [
+    ('0 0 * * *', 'reminder.cron.create_reminder',
+     '>>' + os.path.join(BASE_DIR, 'cron.log')),
+]
+CRONTAB_COMMAND_SUFFIX = '2>&1'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -186,9 +193,10 @@ AWS_ACCESS_KEY_ID = get_secret('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = get_secret('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = get_secret('AWS_STORAGE_BUCKET_NAME')
 AWS_REGION = get_secret('AWS_REGION')
-AWS_S3_CUSTOM_DOMAIN = '%s.s3.%s.amazonaws.com' % (AWS_STORAGE_BUCKET_NAME, AWS_REGION)
+AWS_S3_CUSTOM_DOMAIN = '%s.s3.%s.amazonaws.com' % (
+    AWS_STORAGE_BUCKET_NAME, AWS_REGION)
 AWS_S3_OBJECT_PARAMETERS = {
-    'CacheControl' : 'max-age=86400',
+    'CacheControl': 'max-age=86400',
 }
 AWS_DEFAULT_ACL = 'public-read'
 AWS_MEDIA_LOCATION = 'media'
