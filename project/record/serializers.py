@@ -31,6 +31,7 @@ class PostSerializer(sz.ModelSerializer):
             raise sz.ValidationError(
                 {"response": "error", "message": "지난 날짜는 수정할 수 없습니다."})
         else:
+            instance.image = validated_data.get('image', instance.image)
             instance.emotion = validated_data.get('emotion', instance.emotion)
             instance.detail = validated_data.get('detail', instance.detail)
             instance.save()
