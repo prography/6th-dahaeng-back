@@ -8,6 +8,8 @@ from record.models import Post, Question, UserQuestion
 from record.serializers import PostSerializer, QuestionSerializer, UserQuestionSerializer
 from record.filters import DynamicSearchFilter
 from config.permissions import MyIsAuthenticated
+from core.models import UserCoin
+from core.serializers import UserCoinSerializer
 
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -15,7 +17,8 @@ from django.contrib.auth import get_user_model
 
 # random happy-question
 import random
-from datetime import date, datetime
+from datetime import date, timedelta
+from calendar import monthrange
 
 def pick_number():
     count = Question.objects.all().count()
@@ -64,11 +67,36 @@ class PostCreateView(APIView):
         data._mutable = True
         data['profile'] = request.user.email
         data['question'] = UserQuestion.objects.get(profile=request.user.pk).question
+
+        today = date.today()            
+        yesterday = today - timedelta(days=1)
+        if not Post.objects.get(profile=request.user.email, created_at=yesterday):
+            continuity = 1
+        else:
+            continuity = Post.objects.get(profile=request.user.email, created_at=yesterday).contiuity + 1
+
+        if today.weekaday == 6:
+            if continuity == 7:
+                reward = 50
+            elif continuity == monthrange(today.year, today.month)[1]:
+                reward = 150
+            else:
+                reward = 10
+        elif continuity == monthrange(today.year, today.month)[1]:
+            reward = 50
+            continuity = 0
+        else:
+            reward = 10
+        data['continuity'] = continuity
         data._mutable = _mutable
 
         serializer = PostSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
+            usercoin = UserCoin.oejcts.get(profile=request.user.email)
+            uc_serializer = UserCoinSerializer(usercoin, data={'coin':usercoin.coin + reward}, partial=True)
+            if uc_serializer.is_valid():
+                uc_serializer.save()
             return Response({
                 "response": "success", 
                 "message": "성공적으로 일기를 업로드하였습니다."
