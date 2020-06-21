@@ -62,20 +62,26 @@ class PostCreateView(APIView):
         return Response(sz.data)
     
     def post(self, request):
+        User = get_user_model()
+        email = request.user.email
+        profile = User.objects.get(email=email)
+
         data = request.data
         _mutable = data._mutable
         data._mutable = True
-        data['profile'] = request.user.email
+        data['profile'] = email
         data['question'] = UserQuestion.objects.get(profile=request.user.pk).question
 
         today = date.today()            
         yesterday = today - timedelta(days=1)
-        if not Post.objects.get(profile=request.user.email, created_at=yesterday):
-            continuity = 1
-        else:
-            continuity = Post.objects.get(profile=request.user.email, created_at=yesterday).contiuity + 1
 
-        if today.weekaday == 6:
+        try:
+            lastPost = Post.objects.get(profile=profile.pk, created_at=yesterday)
+            continuity = Post.objects.get(profile=profile.pk, created_at=yesterday).continuity + 1
+        except Post.DoesNotExist:
+            continuity = 1
+
+        if today.weekday() == 6:
             if continuity == 7:
                 reward = 50
             elif continuity == monthrange(today.year, today.month)[1]:
@@ -93,8 +99,9 @@ class PostCreateView(APIView):
         serializer = PostSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            usercoin = UserCoin.oejcts.get(profile=request.user.email)
-            uc_serializer = UserCoinSerializer(usercoin, data={'coin':usercoin.coin + reward}, partial=True)
+            usercoin = UserCoin.objects.get(profile=profile.pk)
+            uc_serializer = UserCoinSerializer(
+                usercoin, data={'coin':usercoin.coin + reward}, partial=True)
             if uc_serializer.is_valid():
                 uc_serializer.save()
             return Response({

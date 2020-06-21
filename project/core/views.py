@@ -7,7 +7,7 @@ from rest_framework_jwt.views import ObtainJSONWebToken
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import update_last_login
 from config.permissions import MyIsAuthenticated
-from .serializers import ProfileSerializer
+from .serializers import ProfileSerializer, UserCoinSerializer
 from .models import Jorang
 from record.models import Question, UserQuestion
 from record.serializers import UserQuestionSerializer
@@ -211,6 +211,10 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
                 data={"profile": email}, partial=True)
             if serializer.is_valid():
                 serializer.save()
+            usercoinSerializer = UserCoinSerializer(data={"profile":email})
+            if usercoinSerializer.is_valid():
+                usercoinSerializer.save()
+
         else:
             userq = UserQuestion.objects.get(profile=profile.id)
             serializer = UserQuestionSerializer(

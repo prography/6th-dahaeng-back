@@ -47,6 +47,7 @@ class PostSerializer(sz.ModelSerializer):
             'profile',
             'emotion',
             'image',
+            'continuity',
         ]
 
 
