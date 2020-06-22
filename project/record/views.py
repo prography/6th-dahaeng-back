@@ -49,13 +49,19 @@ class PostCreateView(APIView):
     
         if userquestion.last_login is None or userquestion.last_login != date.today() or userquestion.question is None:
             qid = pick_number()
-            qobj = get_object_or_404(Question, pk=qid)
-            serializer = UserQuestionSerializer(
-                userquestion,
-                data={"last_login": date.today(), "question": qid},
-                partial=True)
-            if serializer.is_valid():
-                serializer.save()
+            try:
+                question = Question.objects.get(pk=qid)
+                serializer = UserQuestionSerializer(
+                    userquestion,
+                    data={"last_login": date.today(), "question": qid},
+                    partial=True)
+                if serializer.is_valid():
+                    serializer.save()
+            except Question.DoesNotExist:
+                return Response({
+                    "response": "error",
+                    "message": "행복 질문이 존재하지 않습니다. 행복 질문 등록 후 이용하세요"
+                    }, status=status.HTTP_400_BAD_REQUEST)
 
         question = UserQuestion.objects.filter(profile=request.user.pk)
         sz = UserQuestionSerializer(question, many=True)
