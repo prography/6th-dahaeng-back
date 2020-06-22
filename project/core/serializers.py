@@ -25,5 +25,6 @@ class UserCoinSerializer(sz.ModelSerializer):
         model = UserCoin
         fields = [
             'profile',
+            'last_date',
             'coin',
         ]
