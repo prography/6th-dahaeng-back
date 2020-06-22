@@ -72,6 +72,7 @@ class PostCreateView(APIView):
         data['profile'] = email
         data['question'] = UserQuestion.objects.get(profile=request.user.pk).question
 
+        # 연속 기록 체크
         today = date.today()            
         yesterday = today - timedelta(days=1)
 
@@ -81,14 +82,14 @@ class PostCreateView(APIView):
         except Post.DoesNotExist:
             continuity = 1
 
-        if today.weekday() == 6:
+        if today.weekday() == 6: # 7일 연속 기록 체크
             if continuity == 7:
                 reward = 50
-            elif continuity == monthrange(today.year, today.month)[1]:
+            elif continuity == monthrange(today.year, today.month)[1]: # 7일 연속 기록 체크 + 한 달 연속 기록 체크
                 reward = 150
             else:
                 reward = 10
-        elif continuity == monthrange(today.year, today.month)[1]:
+        elif continuity == monthrange(today.year, today.month)[1]: # 한 달 연속 기록 체크
             reward = 50
             continuity = 0
         else:
@@ -100,10 +101,11 @@ class PostCreateView(APIView):
         if serializer.is_valid():
             serializer.save()
             usercoin = UserCoin.objects.get(profile=profile.pk)
-            uc_serializer = UserCoinSerializer(
-                usercoin, data={'coin':usercoin.coin + reward}, partial=True)
-            if uc_serializer.is_valid():
-                uc_serializer.save()
+            if usercoin.last_date != today or not usercoin.last_login: # 하루 코인 적립 1회 제한
+                uc_serializer = UserCoinSerializer(
+                    usercoin, data={"coin":usercoin.coin + reward, "last_date":today}, partial=True)
+                if uc_serializer.is_valid():
+                    uc_serializer.save()
             return Response({
                 "response": "success", 
                 "message": "성공적으로 일기를 업로드하였습니다."

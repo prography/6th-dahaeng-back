@@ -84,4 +84,5 @@ class Jorang(models.Model):
 
 class UserCoin(models.Model):
     profile = models.OneToOneField(Profile, on_delete=models.CASCADE)
+    last_date = models.DateField(null=True)
     coin = models.PositiveIntegerField(default=0)
