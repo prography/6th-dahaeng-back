@@ -82,15 +82,14 @@ class PostCreateView(APIView):
         except Post.DoesNotExist:
             continuity = 1
 
-        if today.weekday() == 6: # 7일 연속 기록 체크
-            if continuity == 7:
-                reward = 50
-            elif continuity == monthrange(today.year, today.month)[1]: # 7일 연속 기록 체크 + 한 달 연속 기록 체크
-                reward = 150
-            else:
-                reward = 10
-        elif continuity == monthrange(today.year, today.month)[1]: # 한 달 연속 기록 체크
+        if continuity == 7:
+            reward = 20
+        elif continuity == 17:
+            reward = 30
+        elif continuity == 27:
             reward = 50
+        elif continuity == monthrange(today.year, today.month)[1]:
+            reward = 100
             continuity = 0
         else:
             reward = 10
