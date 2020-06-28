@@ -15,8 +15,7 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 
-# random happy-question
-import random
+from random import randint
 from datetime import date, timedelta
 from calendar import monthrange
 
@@ -24,7 +23,7 @@ def pick_number():
     count = Question.objects.all().count()
     if count < 1:
         return 0
-    return random.randint(1, count)
+    return randint(1, count)
 
 class PostList(ListAPIView):
     """
@@ -81,13 +80,13 @@ class PostCreateView(APIView):
         data['question'] = UserQuestion.objects.get(profile=request.user.pk).question
 
         # 연속 기록 체크
-        today = date.today()            
+        today = date.today()
         yesterday = today - timedelta(days=1)
         tommorow = today + timedelta(days=1)
 
         try:
             lastPost = Post.objects.get(profile=profile.pk, created_at=yesterday)
-            continuity = Post.objects.get(profile=profile.pk, created_at=yesterday).continuity + 1
+            continuity = lastPost.continuity + 1
         except Post.DoesNotExist:
             continuity = 1
 
