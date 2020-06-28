@@ -8,20 +8,22 @@ from record.models import Post, Question, UserQuestion
 from record.serializers import PostSerializer, QuestionSerializer, UserQuestionSerializer
 from record.filters import DynamicSearchFilter
 from config.permissions import MyIsAuthenticated
+from core.models import UserCoin
+from core.serializers import UserCoinSerializer
 
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 
-# random happy-question
-import random
-from datetime import date, datetime
+from random import randint
+from datetime import date, timedelta
+from calendar import monthrange
 
 def pick_number():
     count = Question.objects.all().count()
     if count < 1:
         return 0
-    return random.randint(1, count)
+    return randint(1, count)
 
 class PostList(ListAPIView):
     """
@@ -43,36 +45,87 @@ class PostCreateView(APIView):
         email = request.user.email
         profile = User.objects.get(email=email)
         userquestion = UserQuestion.objects.get(profile=profile.pk)
-    
-        if userquestion.last_login is None or userquestion.last_login != date.today() or userquestion.question is None:
+
+        # 하루에 한 개씩 행복 질문을 랜덤으로 생성
+        if userquestion.question is None or userquestion.last_login != date.today() :
             qid = pick_number()
-            qobj = get_object_or_404(Question, pk=qid)
-            serializer = UserQuestionSerializer(
-                userquestion,
-                data={"last_login": date.today(), "question": qid},
-                partial=True)
-            if serializer.is_valid():
-                serializer.save()
+            try:
+                question = Question.objects.get(pk=qid)
+                serializer = UserQuestionSerializer(
+                    userquestion,
+                    data={"last_login": date.today(), "question": qid},
+                    partial=True)
+                if serializer.is_valid():
+                    serializer.save()
+            except Question.DoesNotExist:
+                return Response({
+                    "response": "error",
+                    "message": "행복 질문이 존재하지 않습니다. 행복 질문 등록 후 이용하세요"
+                    }, status=status.HTTP_400_BAD_REQUEST)
 
         question = UserQuestion.objects.filter(profile=request.user.pk)
         sz = UserQuestionSerializer(question, many=True)
         return Response(sz.data)
     
     def post(self, request):
+        User = get_user_model()
+        email = request.user.email
+        profile = User.objects.get(email=email)
+        usercoin = UserCoin.objects.get(profile=profile.pk)
+
         data = request.data
         _mutable = data._mutable
         data._mutable = True
-        data['profile'] = request.user.email
+        data['profile'] = email
         data['question'] = UserQuestion.objects.get(profile=request.user.pk).question
-        data._mutable = _mutable
 
+        # 연속 기록 체크
+        today = date.today()
+        yesterday = today - timedelta(days=1)
+        tommorow = today + timedelta(days=1)
+
+        try:
+            lastPost = Post.objects.get(profile=profile.pk, created_at=yesterday)
+            continuity = lastPost.continuity + 1
+        except Post.DoesNotExist:
+            continuity = 1
+
+        if continuity == 7:                                        # 7일 연속 기록 보상
+            reward = 20
+        elif continuity == 17:                                     # 17일 연속 기록 보상
+            reward = 30
+        elif continuity == 27:                                     # 27일 연속 기록 보상
+            reward = 50
+        elif continuity == monthrange(today.year, today.month)[1]: # 한 달 연속 기록 보상
+            reward = 100
+        else:                                                      # 기본 기록 보상
+            reward = 10
+
+        if today.month != tommorow.month:                          # 매 달 연속 기록 체크 초기화
+            continuity = 0
+        data['continuity'] = continuity
+        data._mutable = _mutable
         serializer = PostSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
+
+            reward_of_today = usercoin.coin
+            if usercoin.last_date is None:                         # 첫 일기 기록 보상
+                reward_of_today = 100
+            elif usercoin.last_date != today:                      # 하루 보상 제공 1회 제한
+                reward_of_today += reward
+            uc_serializer = UserCoinSerializer(
+                usercoin, data={"coin":reward_of_today, "last_date":today}, partial=True)
+            if uc_serializer.is_valid():
+                uc_serializer.save()
+
             return Response({
                 "response": "success", 
-                "message": "성공적으로 일기를 업로드하였습니다."
-                }, status=status.HTTP_201_CREATED)
+                "message": "성공적으로 일기를 업로드하였습니다.",
+                "detail": {
+                    "coin": reward_of_today,
+                    "continuity": continuity
+                }}, status=status.HTTP_201_CREATED)
         return Response({
             "response": "error",
             "message": serializer.errors

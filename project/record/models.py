@@ -36,7 +36,8 @@ class Post(models.Model):
     detail = models.TextField(blank=True)
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     image = models.ImageField(
-        default='default_image_sample.jpg', upload_to=date_upload_to, null=True)
+        default='default_image_sample.jpg', upload_to=date_upload_to)
+    continuity = models.IntegerField(default=0)
 
     class Meta:
         unique_together = ('created_at', 'profile')

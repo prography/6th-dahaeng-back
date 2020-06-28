@@ -80,3 +80,9 @@ class Jorang(models.Model):
 
     def __str__(self):
         return self.nickname
+
+
+class UserCoin(models.Model):
+    profile = models.OneToOneField(Profile, on_delete=models.CASCADE)
+    last_date = models.DateField(null=True)
+    coin = models.PositiveIntegerField(default=0)
