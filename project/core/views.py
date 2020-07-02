@@ -6,6 +6,7 @@ from rest_framework_jwt.utils import jwt_decode_handler
 from rest_framework_jwt.views import ObtainJSONWebToken
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import update_last_login
+from django.http import Http404
 from config.permissions import MyIsAuthenticated
 from .serializers import ProfileSerializer, UserCoinSerializer
 from .models import Jorang
@@ -81,9 +82,15 @@ class CreateProfileView(APIView):
 
 
 class ProfileDetailView(APIView):
+    def get_object(self, profile_id):
+        try:
+            return get_user_model().objects.get(id=profile_id)
+        except get_user_model().DoesNotExist:
+            raise Http404
+
     def get(self, request, profile_id):
         # TODO: orm 개선
-        profile = get_user_model().objects.get(id=profile_id)
+        profile = self.get_object(profile_id)
         jorang = Jorang.objects.get(profile=profile.id)
         return Response({
             'response': 'success',
