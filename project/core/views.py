@@ -24,6 +24,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
 from datetime import date
 
+
 class CreateProfileView(APIView):
     permission_classes = [AllowAny]
 
@@ -80,8 +81,18 @@ class CreateProfileView(APIView):
 
 
 class ProfileDetailView(APIView):
-    def get(self, request):
-        breakpoint()
+    def get(self, request, profile_id):
+        # TODO: orm 개선
+        profile = get_user_model().objects.get(id=profile_id)
+        jorang = Jorang.objects.get(profile=profile.id)
+        return Response({
+            'response': 'success',
+            'message': {
+                'email':  profile.email,
+                'jorang_nickname': jorang.nickname,
+                'jorang_color': jorang.color
+            }
+        })
 
 
 @api_view(['GET'])
@@ -191,7 +202,6 @@ def jorang_create(request):
 
 
 class MyObtainJSONWebToken(ObtainJSONWebToken):
-    # TODO: error handling
     def post(self, request):
         response = super().post(request, content_type='application/json')
         if response.status_code != 200:
@@ -216,7 +226,7 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
                 data={"profile": email}, partial=True)
             if serializer.is_valid():
                 serializer.save()
-            usercoinSerializer = UserCoinSerializer(data={"profile":email})
+            usercoinSerializer = UserCoinSerializer(data={"profile": email})
             if usercoinSerializer.is_valid():
                 usercoinSerializer.save()
 
@@ -243,6 +253,7 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
             'response': 'success',
             'message': {
                 'token': response.data['token'],
+                'profile_id': profile.id,
                 'has_jorang': has_jorang,
                 'jorang': {
                     'nickname': jorang_nickname,
