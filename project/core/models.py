@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
 
@@ -71,6 +72,7 @@ class Profile(AbstractBaseUser, PermissionsMixin):
 
 
 class Jorang(models.Model):
+
     nickname = models.CharField(max_length=50)
     color = models.CharField(max_length=6, help_text='16진수 코드 6개 ex) FFFFFF')
     profile = models.OneToOneField(
@@ -79,8 +81,8 @@ class Jorang(models.Model):
     def __str__(self):
         return self.nickname
 
-    def get_or_none(classmodel, **kwargs):
-        try:
-            return classmodel.objects.get(**kwargs)
-        except classmodel.DoesNotExist:
-            return None
+
+class UserCoin(models.Model):
+    profile = models.OneToOneField(Profile, on_delete=models.CASCADE)
+    last_date = models.DateField(null=True)
+    coin = models.PositiveIntegerField(default=0)

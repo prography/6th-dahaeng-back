@@ -7,12 +7,12 @@ from rest_framework_jwt.views import ObtainJSONWebToken
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import update_last_login
 from config.permissions import MyIsAuthenticated
-from .serializers import ProfileSerializer
+from .serializers import ProfileSerializer, UserCoinSerializer
 from .models import Jorang
 from record.models import Question, UserQuestion
 from record.serializers import UserQuestionSerializer
+from random import choice
 
-from random import randint
 
 # email
 from django.contrib.sites.shortcuts import get_current_site
@@ -22,6 +22,7 @@ from django.utils.encoding import force_bytes, force_text
 from .tokens import account_activation_token
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
+from datetime import date
 
 class CreateProfileView(APIView):
     permission_classes = [AllowAny]
@@ -156,31 +157,30 @@ def user_active(request):
     })
 
 
+def random_color():
+    colors = ["FFE884", "FC9285", "8BAAD8", "F4E9DC", "BD97B4"]
+    return choice(colors)
+
+
 @api_view(['POST'])
 @permission_classes([MyIsAuthenticated, ])
 def jorang_create(request):
     """
     {
-        "nickname": "산림수",
-        "color": "000000"
+        "nickname": "산림수"
     }
     """
-    token = request.META['HTTP_AUTHORIZATION'].split()[1]
     try:
         nickname = request.data['nickname']
-        color = request.data['color']
     except KeyError:
         return Response({
             'response': 'error',
             'message': 'request body의 파라미터가 잘못되었습니다.'
         })
-    decoded_payload = jwt_decode_handler(token)
-    email = decoded_payload['email']
-    User = get_user_model()
-    profile = User.objects.get(email=email)
+    profile = request.user
     Jorang.objects.create(
         nickname=nickname,
-        color=color,
+        color=random_color(),
         profile=profile
     )
 
@@ -194,10 +194,21 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
     # TODO: error handling
     def post(self, request):
         response = super().post(request, content_type='application/json')
+        if response.status_code != 200:
+            return Response({
+                'response': 'error',
+                'message': '로그인이 실패하였습니다.'
+            })
         is_first_login = False
         User = get_user_model()
         email = request.data.get('email', '')
-        profile = User.objects.get(email=email)
+        try:
+            profile = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({
+                'response': 'error',
+                'message': '유효하지않은 계정입니다.'
+            })
 
         if profile.last_login is None:
             is_first_login = True
@@ -205,10 +216,14 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
                 data={"profile": email}, partial=True)
             if serializer.is_valid():
                 serializer.save()
+            usercoinSerializer = UserCoinSerializer(data={"profile":email})
+            if usercoinSerializer.is_valid():
+                usercoinSerializer.save()
+
         else:
             userq = UserQuestion.objects.get(profile=profile.id)
             serializer = UserQuestionSerializer(
-                userq, data={"last_login": profile.last_login}, partial=True)
+                userq, data={"last_login": date.today()}, partial=True)
             if serializer.is_valid():
                 serializer.save()
 
@@ -235,3 +250,10 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
                 }
             }
         })
+
+
+def get_or_none(classmodel, **kwargs):
+    try:
+        return classmodel.objects.get(**kwargs)
+    except classmodel.DoesNotExist:
+        return None
