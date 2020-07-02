@@ -78,6 +78,11 @@ class CreateProfileView(APIView):
         """
 
 
+class ProfileDetailView(APIView):
+    def get(self, request):
+        breakpoint()
+
+
 @api_view(['GET'])
 @permission_classes([MyIsAuthenticated, ])
 def login_test(request):
