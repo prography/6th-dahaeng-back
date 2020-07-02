@@ -97,7 +97,8 @@ class ProfileDetailView(APIView):
             'message': {
                 'email':  profile.email,
                 'jorang_nickname': jorang.nickname,
-                'jorang_color': jorang.color
+                'jorang_color': jorang.color,
+                'jorang_status': jorang.status
             }
         })
 
