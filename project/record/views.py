@@ -12,7 +12,6 @@ from core.models import UserCoin
 from core.serializers import UserCoinSerializer
 
 from django.http import Http404
-from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 
 from random import randint

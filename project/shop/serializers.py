@@ -15,9 +15,6 @@ class ItemSerializer(sz.ModelSerializer):
         
     
 class UserItemSerializer(sz.ModelSerializer):
-    profile = sz.SlugRelatedField(
-        queryset=Profile.objects.all(), slug_field='email',)
-
     class Meta:
         model = UserItems
         fields = [
