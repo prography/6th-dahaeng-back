@@ -11,3 +11,4 @@ django-crontab==0.7.1
 awscli==1.18.93
 awsebcli==3.18.1
 mysqlclient==2.0.1
+PyMySQL==0.9.3
