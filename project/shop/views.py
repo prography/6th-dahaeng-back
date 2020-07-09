@@ -15,10 +15,26 @@ class ItemListView(APIView):
     permssion_classes = [MyIsAuthenticated, ]
     
     def get(self, request):
-        items = Items.objects.all()
-        serializer = ItemSerializer(items, many=True)
-        return Response(serializer.data)
-    
+        User = get_user_model()
+        email = request.user.email
+        profile = User.objects.get(email=email)
+
+        try:
+            had_item_list = UserItems.objects.filter(profile=profile)
+            had_items = Items.objects.filter(id__in=had_item_list)
+            not_had_items = Items.objects.exclude(id__in=had_item_list)
+        except UserItems.DoesNotExist:
+            had_items = {}
+            not_had_items = Items.objects.all()
+            
+        had_sz = ItemSerializer(had_items, many=True)
+        not_had_sz = ItemSerializer(not_had_items, many=True)
+
+        return Response({
+            "had_items" : had_sz.data,
+            "not_had_items" : not_had_sz.data
+        })
+
 class ItemCreateView(APIView):
     permission_classes = [IsAdminUser]
 
