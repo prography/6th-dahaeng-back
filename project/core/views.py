@@ -6,9 +6,16 @@ from rest_framework_jwt.utils import jwt_decode_handler
 from rest_framework_jwt.views import ObtainJSONWebToken
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import update_last_login
+from django.http import Http404
 from config.permissions import MyIsAuthenticated
-from .serializers import ProfileSerializer
-from .models import Jorang
+from .serializers import ProfileSerializer, UserCoinSerializer
+from .models import Jorang, UserCoin
+from record.models import Question, UserQuestion
+from record.serializers import UserQuestionSerializer
+from shop.models import Item
+from shop.serializers import UserItemSerializer
+from random import choice
+
 
 # email
 from django.contrib.sites.shortcuts import get_current_site
@@ -17,6 +24,8 @@ from django.core.mail import EmailMessage
 from django.utils.encoding import force_bytes, force_text
 from .tokens import account_activation_token
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+
+from datetime import date
 
 
 class CreateProfileView(APIView):
@@ -52,6 +61,13 @@ class CreateProfileView(APIView):
                 'message': serializer.errors
             })
 
+        return Response({
+            'response': 'success',
+            'message': '회원가입이 완료되었습니다.'
+        })
+
+        # TODO: milestone2
+        """
         email_result = send_email_for_active(profile, request)
 
         if email_result:
@@ -64,6 +80,31 @@ class CreateProfileView(APIView):
                 'response': 'error',
                 'message': '이메일을 전송에 실패하였습니다.'
             })
+        """
+
+
+class ProfileDetailView(APIView):
+    def get_object(self, profile_id):
+        try:
+            return get_user_model().objects.get(id=profile_id)
+        except get_user_model().DoesNotExist:
+            raise Http404
+
+    def get(self, request, profile_id):
+        # TODO: orm 개선
+        profile = self.get_object(profile_id)
+        jorang = Jorang.objects.get(profile=profile.id)
+        usercoin = UserCoin.objects.get(profile=profile.id)
+        return Response({
+            'response': 'success',
+            'message': {
+                'email':  profile.email,
+                'jorang_nickname': jorang.nickname,
+                'jorang_color': jorang.color,
+                'jorang_status': jorang.status,
+                'user_coin': usercoin.coin
+            }
+        })
 
 
 @api_view(['GET'])
@@ -139,33 +180,55 @@ def user_active(request):
     })
 
 
+def random_color():
+    colors = ["FFE884", "FC9285", "8BAAD8", "F4E9DC", "BD97B4"]
+    return choice(colors)
+
+
 @api_view(['POST'])
 @permission_classes([MyIsAuthenticated, ])
 def jorang_create(request):
     """
     {
-        "nickname": "산림수",
-        "color": "000000"
+        "nickname": "산림수"
     }
     """
-    token = request.META['HTTP_AUTHORIZATION'].split()[1]
     try:
         nickname = request.data['nickname']
-        color = request.data['color']
     except KeyError:
         return Response({
             'response': 'error',
             'message': 'request body의 파라미터가 잘못되었습니다.'
         })
-    decoded_payload = jwt_decode_handler(token)
-    email = decoded_payload['email']
-    User = get_user_model()
-    profile = User.objects.get(email=email)
+    profile = request.user
+    color=random_color()
     Jorang.objects.create(
         nickname=nickname,
         color=color,
         profile=profile
     )
+
+    # 개인 아이템 소지 목록에 색 추가
+    try:
+        item_id = Item.objects.get(item_type="jorang_color", item_detail=color).id
+        serializer = UserItemSerializer(
+            data={
+                "profile": profile.email,
+                "item": item_id,
+                "is_worn": True
+            })
+        if serializer.is_valid():
+            serializer.save()
+        else:
+            return Response({
+                "response": "error",
+                "message": serializer.errors
+            })
+    except Item.DoesNotExist:
+        return Response({
+            'response': 'error',
+            'message': '존재하지 않는 조랭이 색입니다. 상점에 색 아이템을 추가하세요!'
+        })
 
     return Response({
         'response': 'success',
@@ -174,15 +237,50 @@ def jorang_create(request):
 
 
 class MyObtainJSONWebToken(ObtainJSONWebToken):
-    # TODO: error handling
     def post(self, request):
         response = super().post(request, content_type='application/json')
+        if response.status_code != 200:
+            return Response({
+                'response': 'error',
+                'message': '로그인이 실패하였습니다.'
+            })
         is_first_login = False
         User = get_user_model()
         email = request.data.get('email', '')
-        profile = User.objects.get(email=email)
+        try:
+            profile = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({
+                'response': 'error',
+                'message': '유효하지않은 계정입니다.'
+            })
+
         if profile.last_login is None:
             is_first_login = True
+            serializer = UserQuestionSerializer(
+                data={"profile": email}, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+            usercoinSerializer = UserCoinSerializer(data={"profile": email})
+            if usercoinSerializer.is_valid():
+                usercoinSerializer.save()
+
+        else:
+            userq = UserQuestion.objects.get(profile=profile.id)
+            serializer = UserQuestionSerializer(
+                userq, data={"last_login": date.today()}, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+
+        try:
+            jorang = Jorang.objects.get(profile=profile)
+            has_jorang = True
+            jorang_nickname = jorang.nickname
+            jorang_color = jorang.color
+        except Jorang.DoesNotExist:
+            has_jorang = False
+            jorang_nickname = None
+            jorang_color = None
 
         update_last_login(None, profile)
 
@@ -190,6 +288,18 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
             'response': 'success',
             'message': {
                 'token': response.data['token'],
-                'is_first_login': is_first_login
+                'profile_id': profile.id,
+                'has_jorang': has_jorang,
+                'jorang': {
+                    'nickname': jorang_nickname,
+                    'color': jorang_color
+                }
             }
         })
+
+
+def get_or_none(classmodel, **kwargs):
+    try:
+        return classmodel.objects.get(**kwargs)
+    except classmodel.DoesNotExist:
+        return None

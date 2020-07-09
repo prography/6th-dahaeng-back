@@ -10,4 +10,6 @@ urlpatterns = [
     path('user_active/',
          views.user_active, name='user_active'),
     path('jorang_create/', views.jorang_create, name='jorang_create'),
+    path('profile/<int:profile_id>/',
+         views.ProfileDetailView.as_view(), name="profile"),
 ]

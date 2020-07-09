@@ -4,5 +4,5 @@ from .import views
 
 
 urlpatterns = [
-    path('', views.ReminderView.as_view()),
+    path('', views.ReminderView.as_view(), name="reminder"),
 ]

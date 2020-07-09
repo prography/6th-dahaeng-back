@@ -13,7 +13,7 @@ def date_upload_to(instance, filename):
 
 
 class Question(models.Model):
-    content = models.CharField(max_length=512, unique=True)
+    content = models.CharField(max_length=255, unique=True)
 
     def __str__(self):
         return self.content
@@ -37,7 +37,15 @@ class Post(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     image = models.ImageField(
         default='default_image_sample.jpg', upload_to=date_upload_to)
+    continuity = models.IntegerField(default=0)
 
     class Meta:
         unique_together = ('created_at', 'profile')
         ordering = ('-created_at',)
+
+
+class UserQuestion(models.Model):
+    profile = models.OneToOneField(Profile, on_delete=models.CASCADE)
+    last_login = models.DateField(null=True)
+    question = models.ForeignKey(
+        Question, on_delete=models.SET_NULL, null=True)

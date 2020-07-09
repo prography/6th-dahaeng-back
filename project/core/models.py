@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
 
@@ -13,7 +14,8 @@ class UserManager(BaseUserManager):
             email=self.normalize_email(email),
         )
         user.set_password(password)
-        user.status = '0'
+        # TODO: 이메일 인증 잠시 보류
+        user.status = '1'
         user.role = '0'
         user.save(using=self._db)
         return user
@@ -63,17 +65,31 @@ class Profile(AbstractBaseUser, PermissionsMixin):
         return self.status == '1'
 
     USERNAME_FIELD = 'email'
-    #REQUIRED_FIELDS = ['nickname']
+    # REQUIRED_FIELDS = ['nickname']
 
     def __str__(self):
         return self.email
 
 
 class Jorang(models.Model):
+    STATUS_CHOICES = (
+        ('0', '알'),
+        ('1', '유년기'),
+        ('2', '성장기'),
+        ('3', '성숙기')
+    )
+
     nickname = models.CharField(max_length=50)
     color = models.CharField(max_length=6, help_text='16진수 코드 6개 ex) FFFFFF')
+    status = models.CharField(max_length=2, choices=STATUS_CHOICES, default=0)
     profile = models.OneToOneField(
         Profile, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.nickname
+
+
+class UserCoin(models.Model):
+    profile = models.OneToOneField(Profile, on_delete=models.CASCADE)
+    last_date = models.DateField(null=True)
+    coin = models.PositiveIntegerField(default=0)

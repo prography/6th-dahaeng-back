@@ -132,3 +132,9 @@ dmypy.json
 myvenv
 
 secrets.json
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+
+.DS_store
