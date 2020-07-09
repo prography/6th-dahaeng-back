@@ -1,3 +1,5 @@
+import MySQLdb as Database
+import pymysql
 import json
 import os
 from os.path import abspath, dirname, join
@@ -93,7 +95,8 @@ WSGI_APPLICATION = 'config.wsgi.application'
 #         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
 #     }
 # }
-
+Database.version_info = pymysql.version_info = (1, 3, 13, "final", 0)
+pymysql.install_as_MySQLdb()
 
 DATABASES = {
     'default': {
@@ -105,6 +108,7 @@ DATABASES = {
         'PORT': '3306',
         'OPTIONS': {
             'init_command': 'SET sql_mode="STRICT_TRANS_TABLES"'
+            # 'ssl': {'key': os.path.join(BASE_DIR, 'DahaengKey')}
         }
     }
 }
@@ -189,16 +193,7 @@ CRONJOBS = [
      '>>' + os.path.join(BASE_DIR, 'cron.log')),
 ]
 CRONTAB_COMMAND_SUFFIX = '2>&1'
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'HOST': get_secret('DB_HOST'),
-#         'PORT': get_secret('DB_PORT'),
-#         'NAME': get_secret('DB_NAME'),
-#         'USER': get_secret('DB_USER'),
-#         'PASSWORD': get_secret('DB_PASSWORD')
-#     }
-# }
+
 
 # # AWS S3 Storage
 # DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
