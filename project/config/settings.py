@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'six',
     'record',
     'reminder',
+    'shop',
     'django_crontab',
 ]
 

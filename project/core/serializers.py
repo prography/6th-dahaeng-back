@@ -20,6 +20,11 @@ class ProfileSerializer(sz.ModelSerializer):
 
 class UserCoinSerializer(sz.ModelSerializer):
     profile = sz.SlugRelatedField(queryset=Profile.objects.all(), slug_field='email')
+    
+    def update(self, instance, validated_data):
+        instance.coin = validated_data.get('coin', instance.coin)
+        instance.last_date = validated_data.get('last_date', instance.last_date)
+        return instance
 
     class Meta:
         model = UserCoin
