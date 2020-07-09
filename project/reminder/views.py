@@ -30,7 +30,7 @@ class ReminderView(APIView):
         profile = request.user
         today = date.today()
         posts = Post.objects.filter(profile=profile)
-        event_days = [1, 7, 30, 365]
+        event_days = [2, 7, 30, 365]
         for post in posts:
             post_created_at = post.created_at
             interval = (today-post_created_at).days

@@ -51,8 +51,12 @@ INSTALLED_APPS = [
     'six',
     'record',
     'reminder',
+<<<<<<< HEAD
+    'notice',
+=======
     'shop',
     'django_crontab',
+>>>>>>> 12166529d74c9a5d75cdf491a4ec961bd8bca39b
 ]
 
 MIDDLEWARE = [
@@ -187,6 +191,8 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+<<<<<<< HEAD
+=======
 
 
 CRONJOBS = [
@@ -237,3 +243,4 @@ CORS_ALLOW_HEADERS = (
     'x-csrftoken',
     'x-requested-with',
 )
+>>>>>>> 12166529d74c9a5d75cdf491a4ec961bd8bca39b
