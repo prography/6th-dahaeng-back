@@ -84,7 +84,8 @@ class Jorang(models.Model):
     status = models.CharField(max_length=2, choices=STATUS_CHOICES, default=0)
     profile = models.OneToOneField(
         Profile, null=True, on_delete=models.CASCADE)
-
+    title = models.CharField(max_length=100, default="Da:haeng")
+    
     def __str__(self):
         return self.nickname
 
