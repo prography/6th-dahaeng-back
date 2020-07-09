@@ -1,3 +1,12 @@
 from django.contrib import admin
+from .models import Notice, Read
 
-# Register your models here.
+
+@admin.register(Notice)
+class NoticeAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Read)
+class ReadAdmin(admin.ModelAdmin):
+    pass

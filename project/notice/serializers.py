@@ -5,4 +5,4 @@ from .models import Notice
 class NoticeSerializer(sz.ModelSerializer):
     class Meta:
         model = Notice
-        fields = '__all__'
+        fields = ['id', 'title', 'content', 'created_at']
