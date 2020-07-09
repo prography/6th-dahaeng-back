@@ -1,3 +1,5 @@
+import MySQLdb as Database
+import pymysql
 import json
 import os
 from os.path import abspath, dirname, join
@@ -29,6 +31,7 @@ SECRET_KEY = get_secret('SECRET_KEY')
 
 DEBUG = True
 
+# TODO: 추후 변경
 ALLOWED_HOSTS = ['*']
 
 
@@ -87,10 +90,27 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
+Database.version_info = pymysql.version_info = (1, 3, 13, "final", 0)
+pymysql.install_as_MySQLdb()
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'Dahaeng',
+        'USER': 'Dahaeng',
+        'PASSWORD': 'Dahaeng1!',
+        'HOST': 'dahaenginstance.chzp9ckdofcl.ap-northeast-2.rds.amazonaws.com',
+        'PORT': '3306',
+        'OPTIONS': {
+            'init_command': 'SET sql_mode="STRICT_TRANS_TABLES"'
+            # 'ssl': {'key': os.path.join(BASE_DIR, 'DahaengKey')}
+        }
     }
 }
 
@@ -174,34 +194,25 @@ CRONJOBS = [
      '>>' + os.path.join(BASE_DIR, 'cron.log')),
 ]
 CRONTAB_COMMAND_SUFFIX = '2>&1'
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'HOST': get_secret('DB_HOST'),
-        'PORT': get_secret('DB_PORT'),
-        'NAME': get_secret('DB_NAME'),
-        'USER': get_secret('DB_USER'),
-        'PASSWORD': get_secret('DB_PASSWORD')
-    }
-}
 
-# AWS S3 Storage
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
-# AWS Access
-AWS_ACCESS_KEY_ID = get_secret('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = get_secret('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = get_secret('AWS_STORAGE_BUCKET_NAME')
-AWS_REGION = get_secret('AWS_REGION')
-AWS_S3_CUSTOM_DOMAIN = '%s.s3.%s.amazonaws.com' % (
-    AWS_STORAGE_BUCKET_NAME, AWS_REGION)
-AWS_S3_OBJECT_PARAMETERS = {
-    'CacheControl': 'max-age=86400',
-}
-AWS_DEFAULT_ACL = 'public-read'
-AWS_MEDIA_LOCATION = 'media'
-MEDIA = 'http://%s/%s' % (AWS_S3_CUSTOM_DOMAIN, AWS_MEDIA_LOCATION)
+# # AWS S3 Storage
+# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+# STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+# # AWS Access
+# AWS_ACCESS_KEY_ID = get_secret('AWS_ACCESS_KEY_ID')
+# AWS_SECRET_ACCESS_KEY = get_secret('AWS_SECRET_ACCESS_KEY')
+# AWS_STORAGE_BUCKET_NAME = get_secret('AWS_STORAGE_BUCKET_NAME')
+# AWS_REGION = get_secret('AWS_REGION')
+# AWS_S3_CUSTOM_DOMAIN = '%s.s3.%s.amazonaws.com' % (
+#     AWS_STORAGE_BUCKET_NAME, AWS_REGION)
+# AWS_S3_OBJECT_PARAMETERS = {
+#     'CacheControl': 'max-age=86400',
+# }
+# AWS_DEFAULT_ACL = 'public-read'
+# AWS_MEDIA_LOCATION = 'media'
+# MEDIA = 'http://%s/%s' % (AWS_S3_CUSTOM_DOMAIN, AWS_MEDIA_LOCATION)
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = False
