@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Profile, Jorang, UserCoin
+from .models import Profile, Jorang, UserCoin, Attendance
 
 
 @admin.register(Profile)
@@ -14,3 +14,9 @@ class ProfileAdmin(admin.ModelAdmin):
 @admin.register(UserCoin)
 class UserCoinAdmin(admin.ModelAdmin):
     list_display = ['profile', 'last_date', 'coin']
+
+
+
+@admin.register(Attendance)
+class ProfileAdmin(admin.ModelAdmin):
+    Attendance

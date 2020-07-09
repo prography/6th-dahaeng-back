@@ -8,9 +8,9 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import update_last_login
 from django.http import Http404
 from config.permissions import MyIsAuthenticated
-from .serializers import ProfileSerializer, UserCoinSerializer
-from .models import Jorang, UserCoin
-from record.models import Question, UserQuestion
+from .serializers import ProfileSerializer, UserCoinSerializer, AttendanceSerializer
+from .models import Jorang, UserCoin, Attendance
+from record.models import Question, UserQuestion, Post
 from record.serializers import UserQuestionSerializer
 from shop.models import Item
 from shop.serializers import UserItemSerializer
@@ -95,17 +95,46 @@ class ProfileDetailView(APIView):
         profile = self.get_object(profile_id)
         jorang = Jorang.objects.get(profile=profile.id)
         usercoin = UserCoin.objects.get(profile=profile.id)
+        continuity = Post.objects.get(profile=profile.id, created_at=usercoin.last_date).continuity
+
         return Response({
             'response': 'success',
             'message': {
                 'email':  profile.email,
+                'personal_title': jorang.title,
                 'jorang_nickname': jorang.nickname,
                 'jorang_color': jorang.color,
                 'jorang_status': jorang.status,
+                'user_continuity': continuity,
                 'user_coin': usercoin.coin
             }
         })
+    
+    def post(self, request, profile_id):
+        profile = self.get_object(profile_id)
+        usercoin = UserCoin.objects.get(profile=profile.id)
+        continuity = Post.objects.get(profile=profile.id, created_at=usercoin.last_date).continuity
 
+        nickname = request.data.get('nickname')
+        title = request.data.get('title')
+        
+        jorang = Jorang.objects.get(profile=profile.id)
+        jorang.nickname = nickname
+        jorang.title = title
+        jorang.save()
+
+        return Response({
+            'response': 'success',
+            'message': {
+                'email':  profile.email,
+                'personal_title': jorang.title,
+                'jorang_nickname': jorang.nickname,
+                'jorang_color': jorang.color,
+                'jorang_status': jorang.status,
+                'user_continuity': continuity,
+                'user_coin': usercoin.coin
+            }
+        })
 
 @api_view(['GET'])
 @permission_classes([MyIsAuthenticated, ])
@@ -303,3 +332,17 @@ def get_or_none(classmodel, **kwargs):
         return classmodel.objects.get(**kwargs)
     except classmodel.DoesNotExist:
         return None
+
+
+class AttendanceView(APIView):
+    permission_classes = [MyIsAuthenticated, ]
+    
+    def get(self, request):
+        User = get_user_model()
+        email = request.user.email
+        profile = User.objects.get(email=email)
+
+        attendancer = Attendance.objects.filter(profile=profile, date__month=date.today().month)
+        serializer = AttendanceSerializer(attendancer, many=True)
+
+        return Response(serializer.data)

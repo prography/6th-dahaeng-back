@@ -39,6 +39,9 @@ class Post(models.Model):
         default='default_image_sample.jpg', upload_to=date_upload_to)
     continuity = models.IntegerField(default=0)
 
+    def __str__(self):
+        return "[%d][%s] %s" % (self.id, self.profile, self.created_at)
+        
     class Meta:
         unique_together = ('created_at', 'profile')
         ordering = ('-created_at',)

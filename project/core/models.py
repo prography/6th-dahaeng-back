@@ -93,3 +93,14 @@ class UserCoin(models.Model):
     profile = models.OneToOneField(Profile, on_delete=models.CASCADE)
     last_date = models.DateField(null=True)
     coin = models.PositiveIntegerField(default=0)
+
+
+class Attendance(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    date = models.DateField(null=False)
+
+    def __str__(self):
+        return "(%s) %s" % (self.date, self.profile)
+
+    class Meta:
+        ordering = ['date']
