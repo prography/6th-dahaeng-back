@@ -9,7 +9,7 @@ from django.contrib.auth.models import update_last_login
 from django.http import Http404
 from config.permissions import MyIsAuthenticated
 from .serializers import ProfileSerializer, UserCoinSerializer
-from .models import Jorang
+from .models import Jorang, UserCoin
 from record.models import Question, UserQuestion
 from record.serializers import UserQuestionSerializer
 from shop.models import Item
@@ -94,13 +94,15 @@ class ProfileDetailView(APIView):
         # TODO: orm 개선
         profile = self.get_object(profile_id)
         jorang = Jorang.objects.get(profile=profile.id)
+        usercoin = UserCoin.objects.get(profile=profile.id)
         return Response({
             'response': 'success',
             'message': {
                 'email':  profile.email,
                 'jorang_nickname': jorang.nickname,
                 'jorang_color': jorang.color,
-                'jorang_status': jorang.status
+                'jorang_status': jorang.status,
+                'user_coin': usercoin.coin
             }
         })
 
