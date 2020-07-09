@@ -14,6 +14,7 @@ from core.serializers import UserCoinSerializer
 
 from django.http import Http404
 from django.contrib.auth import get_user_model
+from django.utils.encoding import smart_text
 
 from random import randint
 from datetime import date, timedelta
@@ -115,14 +116,23 @@ class PostCreateView(APIView):
             elif usercoin.last_date != today:                      # 하루 보상 제공 1회 제한
                 reward_of_today += reward
             uc_serializer = UserCoinSerializer(
-                usercoin, data={"coin":reward_of_today, "last_date":today}, partial=True)
+                                usercoin, 
+                                data={"coin":reward_of_today, "last_date":today}, 
+                                partial=True)
             if uc_serializer.is_valid():
                 uc_serializer.save()
-
+            
+            post = Post.objects.get(profile=profile, created_at=today)
             return Response({
                 "response": "success", 
                 "message": "성공적으로 일기를 업로드하였습니다.",
-                "detail": {
+                "post_detail": {
+                    "created_at": post.created_at,
+                    "detail": smart_text(post.detail, encoding='utf-16'),
+                    "emotion": post.emotion,
+                    "image": smart_text(post.image, encoding='utf-16'),
+                },
+                "reward_detail": {
                     "reward_of_today": reward,
                     "coin": reward_of_today,
                     "continuity": continuity
