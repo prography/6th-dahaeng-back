@@ -1,10 +1,10 @@
 from rest_framework import serializers as sz
-from shop.models import Items, UserItems
+from shop.models import Item, UserItem
 from core.models import Profile
 
 class ItemSerializer(sz.ModelSerializer):
     class Meta:
-        model = Items
+        model = Item
         fields = [
             'id', 
             'item_type', 
@@ -23,7 +23,7 @@ class UserItemSerializer(sz.ModelSerializer):
         return instance
         
     class Meta:
-        model = UserItems
+        model = UserItem
         fields = [
             'id',
             'profile',

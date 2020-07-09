@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from config.permissions import MyIsAuthenticated
 from core.models import UserCoin, Jorang
 from core.serializers import UserCoinSerializer
-from shop.models import Items, UserItems
+from shop.models import Item, UserItem
 from shop.serializers import ItemSerializer, UserItemSerializer
 
 class ItemListView(APIView):
@@ -20,12 +20,12 @@ class ItemListView(APIView):
         profile = User.objects.get(email=email)
 
         try:
-            had_item_list = UserItems.objects.filter(profile=profile)
-            had_items = Items.objects.filter(id__in=had_item_list)
-            not_had_items = Items.objects.exclude(id__in=had_item_list)
-        except UserItems.DoesNotExist:
+            had_item_list = UserItem.objects.filter(profile=profile)
+            had_items = Item.objects.filter(id__in=had_item_list)
+            not_had_items = Item.objects.exclude(id__in=had_item_list)
+        except UserItem.DoesNotExist:
             had_items = {}
-            not_had_items = Items.objects.all()
+            not_had_items = Item.objects.all()
             
         had_sz = ItemSerializer(had_items, many=True)
         not_had_sz = ItemSerializer(not_had_items, many=True)
@@ -56,7 +56,7 @@ class ItemDetailView(APIView):
 
     def get_object(self, pk):
         try:
-            return Items.objects.get(pk=pk)
+            return Item.objects.get(pk=pk)
         except:
             raise Http404
     
@@ -100,29 +100,29 @@ class MyClosetView(APIView):
         email = request.user.email
         profile = User.objects.get(email=email)
 
-        useritems = UserItems.objects.all().filter(profile=profile.pk)
+        useritems = UserItem.objects.all().filter(profile=profile.pk)
         serializer = UserItemSerializer(useritems, many=True)
         return Response(serializer.data)
     
     def post(self, request, format=None):
         profile = request.user
         colorId = request.data.get('color').get('id')
-        item = Items.objects.get(id=colorId)
+        item = Item.objects.get(id=colorId)
         
         # 조랭이 색 착용
         try:
             # 같은 타입의 다른 아이템 벗기
             try:
-                useritem = UserItems.objects.filter(profile=profile.pk, item__item_type=item.item_type).exclude(item__item_detail=item.item_detail)
+                useritem = UserItem.objects.filter(profile=profile.pk, item__item_type=item.item_type).exclude(item__item_detail=item.item_detail)
                 useritem.update(is_worn=False)
-            except UserItems.DoesNotExist:
+            except UserItem.DoesNotExist:
                 pass
             
             try:
-                usercolor = UserItems.objects.get(profile=profile.pk, item=colorId)
+                usercolor = UserItem.objects.get(profile=profile.pk, item=colorId)
                 usercolor.is_worn = True
                 usercolor.save()
-            except UserItems.DoesNotExist:
+            except UserItem.DoesNotExist:
                 return Response({
                     "response": "error",
                     "message": "해당 아이템이 없습니다."
