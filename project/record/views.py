@@ -1,4 +1,5 @@
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAdminUser
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -122,6 +123,7 @@ class PostCreateView(APIView):
                 "response": "success", 
                 "message": "성공적으로 일기를 업로드하였습니다.",
                 "detail": {
+                    "reward_of_today": reward,
                     "coin": reward_of_today,
                     "continuity": continuity
                 }}, status=status.HTTP_201_CREATED)
@@ -165,10 +167,9 @@ class PostDetail(APIView):
         post.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-# TODO
-# permission_classes = [IsAdminUser, ]
+
 class QuestionList(APIView):
-    permission_classes = [MyIsAuthenticated, ]
+    permission_classes = [IsAdminUser]
 
     def get(self, request, format=None):
         questions = Question.objects.all()

@@ -1,5 +1,5 @@
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -11,12 +11,29 @@ from core.serializers import UserCoinSerializer
 from shop.models import Items, UserItems
 from shop.serializers import ItemSerializer, UserItemSerializer
 
-class ItemListView(ListAPIView):
+class ItemListView(APIView):
     permssion_classes = [MyIsAuthenticated, ]
-    serializer_class = ItemSerializer
     
-    def get_queryset(self):
-        return Items.objects.all()
+    def get(self, request):
+        items = Items.objects.all()
+        serializer = ItemSerializer(items, many=True)
+        return Response(serializer.data)
+    
+class ItemCreateView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request, format=None):
+        serializer = ItemSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                'response': 'success',
+                'message': '성공적으로 아이템을 업로드하였습니다.'
+            }, status=status.HTTP_201_CREATED)
+        return Response({
+            "response": "error", 
+            "message": serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 class ItemDetailView(APIView):
     permission_classes = [MyIsAuthenticated, ]
@@ -35,21 +52,15 @@ class ItemDetailView(APIView):
     def post(self, request, pk, format=None):
         item = self.get_object(pk)
         price = item.item_price
-
-        User = get_user_model()
-        email = request.user.email
-        profile = User.objects.get(email=email)
-        usercoin = UserCoin.objects.get(profile=profile.pk)
+        usercoin = UserCoin.objects.get(profile=request.user.pk)
 
         if usercoin.coin >= price:
-            data = request.data
-            data['profile'] = email
-            data['item'] = pk
-            serializer = UserItemSerializer(data=data)
+            request.data['profile']=request.user.email
+            serializer = UserItemSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
                 usercoin.coin -= price
-                usercoin.update()
+                usercoin.save()
                 return Response({
                     "reponse": "success",
                     "coin": usercoin.coin,
@@ -57,7 +68,7 @@ class ItemDetailView(APIView):
                 })
             return Response({
                 "response": "error",
-                "message": serializer.error
+                "message": serializer.errors
             })
         else:
             return Response({
@@ -80,27 +91,38 @@ class MyClosetView(APIView):
     def post(self, request, format=None):
         profile = request.user
         colorId = request.data.get('color').get('id')
-
+        item = Items.objects.get(id=colorId)
+        
+        # 조랭이 색 착용
         try:
-            jorang = Jorang.objects.get(profile=profile)
+            # 같은 타입의 다른 아이템 벗기
             try:
-                useritem = UserItems.objects.get(profile=profile.pk, item__item_detail=colorId)
-                item_type = useritem.item_type
-                useritem.is_worn = True
-                useritem.save()
-            except UserItems.DoesNotExist:
-                return Response({
-                    'response': 'error',
-                    'message': '헤당 아이템이 존재하지 않습니다.'
-                })
-                
-            try:
-                useritem = UserItems.objects.exclude(profile=profile.pk, item__item_detail=colorId).filter(profile=profile.pk, item__item_type=item_type)
+                useritem = UserItems.objects.filter(profile=profile.pk, item__item_type=item.item_type).exclude(item__item_detail=item.item_detail)
                 useritem.update(is_worn=False)
             except UserItems.DoesNotExist:
                 pass
+            
+            try:
+                usercolor = UserItems.objects.get(profile=profile.pk, item=colorId)
+                usercolor.is_worn = True
+                usercolor.save()
+            except UserItems.DoesNotExist:
+                return Response({
+                    "response": "error",
+                    "message": "해당 아이템이 없습니다."
+                })
+
+            jorang = Jorang.objects.get(profile=profile)
+            jorang.color = item.item_detail
+            jorang.save()
+
+            return Response({
+                "response": "success",
+                "message": "성공적으로 아이템을 착용하였습니다.",
+                "item information": "%s (%s)" % (item.item_type, item.item_detail)
+            })
         except Jorang.DoesNotExist:
             return Response({
                 'response': 'error',
                 'message': '조랭이가 없습니다. 조랭이를 먼저 생성하세요.'
-            })
+            }, status=status.HTTP_400_BAD_REQUEST)

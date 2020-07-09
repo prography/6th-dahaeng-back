@@ -12,6 +12,8 @@ from .serializers import ProfileSerializer, UserCoinSerializer
 from .models import Jorang
 from record.models import Question, UserQuestion
 from record.serializers import UserQuestionSerializer
+from shop.models import Items
+from shop.serializers import UserItemSerializer
 from random import choice
 
 
@@ -197,11 +199,34 @@ def jorang_create(request):
             'message': 'request body의 파라미터가 잘못되었습니다.'
         })
     profile = request.user
+    color=random_color()
     Jorang.objects.create(
         nickname=nickname,
-        color=random_color(),
+        color=color,
         profile=profile
     )
+
+    # 개인 아이템 소지 목록에 색 추가
+    try:
+        item_id = Items.objects.get(item_type="jorang_color", item_detail=color).id
+        serializer = UserItemSerializer(
+            data={
+                "profile": profile.email,
+                "item": item_id,
+                "is_worn": True
+            })
+        if serializer.is_valid():
+            serializer.save()
+        else:
+            return Response({
+                "response": "error",
+                "message": serializer.errors
+            })
+    except Items.DoesNotExist:
+        return Response({
+            'response': 'error',
+            'message': '존재하지 않는 조랭이 색입니다. 상점에 색 아이템을 추가하세요!'
+        })
 
     return Response({
         'response': 'success',
