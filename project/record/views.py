@@ -9,7 +9,7 @@ from record.models import Post, Question, UserQuestion
 from record.serializers import PostSerializer, QuestionSerializer, UserQuestionSerializer
 from record.filters import DynamicSearchFilter
 from config.permissions import MyIsAuthenticated
-from core.models import UserCoin
+from core.models import UserCoin, Attendance
 from core.serializers import UserCoinSerializer
 
 from django.http import Http404
@@ -109,12 +109,17 @@ class PostCreateView(APIView):
         serializer = PostSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
+            Attendance.objects.create(
+                    profile=profile,
+                    date=today,
+                    emotion=data['emotion'])
 
             reward_of_today = usercoin.coin
             if usercoin.last_date is None:                         # 첫 일기 기록 보상
                 reward_of_today = 100
             elif usercoin.last_date != today:                      # 하루 보상 제공 1회 제한
                 reward_of_today += reward
+
             uc_serializer = UserCoinSerializer(
                                 usercoin, 
                                 data={"coin":reward_of_today, "last_date":today}, 
@@ -155,27 +160,70 @@ class PostDetail(APIView):
             raise Http404
 
     def get(self, request, pk, format=None):
+        User = get_user_model()
+        email = request.user.email
+        profile = User.objects.get(email=email)
+
         post = self.get_object(pk)
         serializer = PostSerializer(post)
-        return Response(serializer.data)
+        
+        if post.profile == profile or profile.role == 10:
+            return Response(serializer.data)
+        else:
+            return Response({
+                'response': 'error',
+                'message': '다른 사람의 일기는 볼 수 없어요.'
+            })
     
     def patch(self, request, pk, format=None):
         post = self.get_object(pk)
-        serializer = PostSerializer(post, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
+
+        User = get_user_model()
+        email = request.user.email
+        profile = User.objects.get(email=email)
+
+        if post.profile == profile or profile.role == 10:
+            serializer = PostSerializer(post, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({
+                    "response": "success", 
+                    "message": "성공적으로 수정하였습니다."})
             return Response({
-                "response": "success", 
-                "message": "성공적으로 수정하였습니다."})
-        return Response({
-            "response": "error", 
-            "message" : serializer.errors
-            }, status=status.HTTP_400_BAD_REQUEST)
+                "response": "error", 
+                "message" : serializer.errors
+                }, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({
+                'response': 'error',
+                'message': '다른 사람의 일기는 수정할 수 없어요.'
+            })
 
     def delete(self, request, pk, format=None):
         post = self.get_object(pk)
-        post.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+
+        User = get_user_model()
+        email = request.user.email
+        profile = User.objects.get(email=email)
+        usercoin = UserCoin.objects.get(profile=profile.id)
+
+        if post.profile == profile or profile.role == 10:
+            if post.created_at == usercoin.last_date:
+                return Response({
+                    'response': 'error',
+                    'message': '마지막 기록은 지울 수 없습니다.'
+                })
+            else:
+                post.delete()
+                return Response({
+                    'response': 'success',
+                    'message': '기록을 삭제하였습니다.'
+                }, status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response({
+                'response': 'error',
+                'message': '다른 사람의 일기는 삭제할 수 없어요.'
+            })
 
 
 class QuestionList(APIView):

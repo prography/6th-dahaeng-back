@@ -1,6 +1,6 @@
 from rest_framework import serializers as sz
 from django.contrib.auth import get_user_model
-from core.models import Profile, UserCoin
+from core.models import Profile, UserCoin, Attendance
 
 class ProfileSerializer(sz.ModelSerializer):
     password = sz.CharField(write_only=True)
@@ -32,4 +32,13 @@ class UserCoinSerializer(sz.ModelSerializer):
             'profile',
             'last_date',
             'coin',
+        ]
+
+
+class AttendanceSerializer(sz.ModelSerializer):
+    class Meta:
+        model = Attendance
+        fields = [
+            'date',
+            'emotion'
         ]

@@ -84,12 +84,26 @@ class Jorang(models.Model):
     status = models.CharField(max_length=2, choices=STATUS_CHOICES, default=0)
     profile = models.OneToOneField(
         Profile, null=True, on_delete=models.CASCADE)
-
+    title = models.CharField(max_length=100, default="Da:haeng")
+    
     def __str__(self):
-        return self.nickname
+        return "[%s] %s (%s)" % (self.profile, self.nickname, self.title)
 
 
 class UserCoin(models.Model):
     profile = models.OneToOneField(Profile, on_delete=models.CASCADE)
     last_date = models.DateField(null=True)
     coin = models.PositiveIntegerField(default=0)
+
+
+class Attendance(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    date = models.DateField(null=False)
+    emotion = models.CharField(max_length=10, null=True)
+
+    def __str__(self):
+        return "(%s) %s" % (self.date, self.profile)
+
+    class Meta:
+        unique_together = ('profile', 'date')
+        ordering = ['date']
