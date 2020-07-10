@@ -342,7 +342,7 @@ class AttendanceView(APIView):
         email = request.user.email
         profile = User.objects.get(email=email)
 
-        attendancer = Attendance.objects.filter(profile=profile, date__month=date.today().month)
+        attendancer = Attendance.objects.filter(profile=profile, date__year=date.today().year, date__month=date.today().month)
         serializer = AttendanceSerializer(attendancer, many=True)
 
         return Response(serializer.data)

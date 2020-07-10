@@ -39,5 +39,6 @@ class AttendanceSerializer(sz.ModelSerializer):
     class Meta:
         model = Attendance
         fields = [
-            'date'
+            'date',
+            'emotion'
         ]

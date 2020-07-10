@@ -109,16 +109,17 @@ class PostCreateView(APIView):
         serializer = PostSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
+            Attendance.objects.create(
+                    profile=profile,
+                    date=today,
+                    emotion=data['emotion'])
 
             reward_of_today = usercoin.coin
             if usercoin.last_date is None:                         # 첫 일기 기록 보상
                 reward_of_today = 100
             elif usercoin.last_date != today:                      # 하루 보상 제공 1회 제한
                 reward_of_today += reward
-                Attendance.objects.create(
-                    profile=profile,
-                    date=today
-                )
+
             uc_serializer = UserCoinSerializer(
                                 usercoin, 
                                 data={"coin":reward_of_today, "last_date":today}, 

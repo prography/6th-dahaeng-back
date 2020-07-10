@@ -99,9 +99,11 @@ class UserCoin(models.Model):
 class Attendance(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     date = models.DateField(null=False)
+    emotion = models.CharField(max_length=10, null=True)
 
     def __str__(self):
         return "(%s) %s" % (self.date, self.profile)
 
     class Meta:
+        unique_together = ('profile', 'date')
         ordering = ['date']
