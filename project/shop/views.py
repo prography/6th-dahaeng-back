@@ -77,7 +77,7 @@ class ItemDetailView(APIView):
                 usercoin.coin -= price
                 usercoin.save()
                 return Response({
-                    "reponse": "success",
+                    "response": "success",
                     "coin": usercoin.coin,
                     "message": "아이템을 성공적으로 구매했습니다."
                 })
