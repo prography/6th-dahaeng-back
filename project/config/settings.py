@@ -237,3 +237,6 @@ CORS_ALLOW_HEADERS = (
     'x-csrftoken',
     'x-requested-with',
 )
+
+KAKAO_APP_KEY = get_secret('KAKAO_APP_KEY')
+KAKAO_REDIRECT_URI = get_secret('KAKAO_REDIRECT_URI')

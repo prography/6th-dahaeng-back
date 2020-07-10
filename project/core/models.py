@@ -46,11 +46,20 @@ class Profile(AbstractBaseUser, PermissionsMixin):
         ('10', '관리자')
     )
 
+    SOCIAL_CHOICES = (
+        ("KAKAO", "kakao"),
+        ("NAVER", "naver"),
+        ("APPLE", "apple"),
+        ("NONE", "none")
+    )
+
     email = models.EmailField(max_length=50, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=2, choices=STATUS_CHOICES, blank=True)
     role = models.CharField(max_length=2, choices=ROLE_CHOICES, blank=True)
+    social = models.CharField(
+        max_length=20, choices=SOCIAL_CHOICES, null=True, blank=True, default="NONE")
 
     @property
     def is_staff(self):

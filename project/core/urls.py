@@ -1,6 +1,11 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
+from . import social
 from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register(r'', social.UserSocialViewSet)
 
 urlpatterns = [
     path('', views.login_test, name='login_test'),
@@ -12,5 +17,6 @@ urlpatterns = [
     path('jorang_create/', views.jorang_create, name='jorang_create'),
     path('profile/<int:profile_id>/',
          views.ProfileDetailView.as_view(), name="profile"),
-    path('attendance/', views.AttendanceView.as_view(), name='attendance')
+    path('attendance/', views.AttendanceView.as_view(), name='attendance'),
+    path('social/', include(router.urls)),
 ]
