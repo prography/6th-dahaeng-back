@@ -52,3 +52,6 @@ class UserQuestion(models.Model):
     last_login = models.DateField(null=True)
     question = models.ForeignKey(
         Question, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return "[%s][%s] %s" % (self.profile, self.last_login, self.question)

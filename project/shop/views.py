@@ -20,13 +20,12 @@ class ItemListView(APIView):
         profile = User.objects.get(email=email)
 
         try:
-            had_item_list = UserItem.objects.filter(profile=profile)
+            had_item_list = UserItem.objects.filter(profile=profile).values('item').distinct()
             had_items = Item.objects.filter(id__in=had_item_list)
             not_had_items = Item.objects.exclude(id__in=had_item_list)
         except UserItem.DoesNotExist:
             had_items = {}
             not_had_items = Item.objects.all()
-            
         had_sz = ItemSerializer(had_items, many=True)
         not_had_sz = ItemSerializer(not_had_items, many=True)
 
