@@ -87,7 +87,7 @@ class Jorang(models.Model):
     title = models.CharField(max_length=100, default="Da:haeng")
     
     def __str__(self):
-        return self.nickname
+        return "[%s] %s (%s)" % (self.profile, self.nickname, self.title)
 
 
 class UserCoin(models.Model):
