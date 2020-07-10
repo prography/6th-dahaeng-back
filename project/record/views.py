@@ -132,6 +132,7 @@ class PostCreateView(APIView):
                 "response": "success", 
                 "message": "성공적으로 일기를 업로드하였습니다.",
                 "post_detail": {
+                    "id": post.id,
                     "created_at": post.created_at,
                     "detail": smart_text(post.detail, encoding='utf-16'),
                     "emotion": post.emotion,
