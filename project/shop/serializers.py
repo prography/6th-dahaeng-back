@@ -17,6 +17,7 @@ class ItemSerializer(sz.ModelSerializer):
 class UserItemSerializer(sz.ModelSerializer):
     profile = sz.SlugRelatedField(
         queryset=Profile.objects.all(), slug_field='email',)
+    item = ItemSerializer(read_only=True)
     
     def update(self, instance, validated_data):
         instance.is_worn = validated_data.get('is_worn', instance.is_worn)
@@ -25,7 +26,6 @@ class UserItemSerializer(sz.ModelSerializer):
     class Meta:
         model = UserItem
         fields = [
-            'id',
             'profile',
             'item',
             'is_worn'
