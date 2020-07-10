@@ -17,6 +17,7 @@ class UserManager(BaseUserManager):
         # TODO: 이메일 인증 잠시 보류
         user.status = '1'
         user.role = '0'
+        user.social = "NONE"
         user.save(using=self._db)
         return user
 
@@ -27,6 +28,7 @@ class UserManager(BaseUserManager):
         )
         user.status = '1'
         user.role = '10'
+        user.social = "NONE"
         user.save(using=self._db)
         return user
 
