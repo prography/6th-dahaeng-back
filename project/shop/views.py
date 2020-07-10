@@ -105,7 +105,7 @@ class MyClosetView(APIView):
     
     def post(self, request, format=None):
         profile = request.user
-        colorId = request.data.get('color').get('id')
+        colorId = request.data.get('color').get('item')
         item = Item.objects.get(id=colorId)
         
         # 조랭이 색 착용
