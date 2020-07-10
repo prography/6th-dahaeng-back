@@ -20,5 +20,8 @@ class UserItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     is_worn = models.BooleanField(default=False)
 
+    def __str__(self):
+        return "[%s] %s(%s) [%s]" % (self.profile, self.item.item_name, self.item.item_detail, self.is_worn)
+
     class Meta:
         unique_together = ('profile', 'item')
