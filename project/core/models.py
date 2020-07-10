@@ -85,7 +85,7 @@ class Jorang(models.Model):
     profile = models.OneToOneField(
         Profile, null=True, on_delete=models.CASCADE)
     title = models.CharField(max_length=100, default="Da:haeng")
-    
+
     def __str__(self):
         return "[%s] %s (%s)" % (self.profile, self.nickname, self.title)
 
