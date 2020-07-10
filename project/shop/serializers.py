@@ -26,6 +26,7 @@ class UserItemSerializer(sz.ModelSerializer):
     class Meta:
         model = UserItem
         fields = [
+            'id',
             'profile',
             'item',
             'is_worn'
