@@ -20,13 +20,12 @@ class ItemListView(APIView):
         profile = User.objects.get(email=email)
 
         try:
-            had_item_list = UserItem.objects.filter(profile=profile)
+            had_item_list = UserItem.objects.filter(profile=profile).values('item').distinct()
             had_items = Item.objects.filter(id__in=had_item_list)
             not_had_items = Item.objects.exclude(id__in=had_item_list)
         except UserItem.DoesNotExist:
             had_items = {}
             not_had_items = Item.objects.all()
-            
         had_sz = ItemSerializer(had_items, many=True)
         not_had_sz = ItemSerializer(not_had_items, many=True)
 
@@ -78,7 +77,7 @@ class ItemDetailView(APIView):
                 usercoin.coin -= price
                 usercoin.save()
                 return Response({
-                    "reponse": "success",
+                    "response": "success",
                     "coin": usercoin.coin,
                     "message": "아이템을 성공적으로 구매했습니다."
                 })
@@ -106,7 +105,7 @@ class MyClosetView(APIView):
     
     def post(self, request, format=None):
         profile = request.user
-        colorId = request.data.get('color').get('id')
+        colorId = request.data.get('color').get('item')
         item = Item.objects.get(id=colorId)
         
         # 조랭이 색 착용

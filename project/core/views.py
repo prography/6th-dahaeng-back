@@ -95,13 +95,18 @@ class ProfileDetailView(APIView):
         profile = self.get_object(profile_id)
         jorang = Jorang.objects.get(profile=profile.id)
         usercoin = UserCoin.objects.get(profile=profile.id)
-        continuity = Post.objects.get(profile=profile.id, created_at=usercoin.last_date).continuity
+
+        try:
+            post = Post.objects.get(profile=profile.id, created_at=usercoin.last_date)
+            continuity = post.continuity
+        except Post.DoesNotExist:
+            continuity = 0
 
         return Response({
             'response': 'success',
             'message': {
                 'email':  profile.email,
-                'personal_title': jorang.title,
+                'title': jorang.title,
                 'jorang_nickname': jorang.nickname,
                 'jorang_color': jorang.color,
                 'jorang_status': jorang.status,
@@ -113,7 +118,12 @@ class ProfileDetailView(APIView):
     def post(self, request, profile_id):
         profile = self.get_object(profile_id)
         usercoin = UserCoin.objects.get(profile=profile.id)
-        continuity = Post.objects.get(profile=profile.id, created_at=usercoin.last_date).continuity
+
+        try:
+            post = Post.objects.get(profile=profile.id, created_at=usercoin.last_date)
+            continuity = post.continuity
+        except Post.DoesNotExist:
+            continuity = 0
 
         nickname = request.data.get('nickname')
         title = request.data.get('title')

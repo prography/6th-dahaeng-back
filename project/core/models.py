@@ -28,6 +28,7 @@ class UserManager(BaseUserManager):
         )
         user.status = '1'
         user.role = '10'
+        user.social = "NONE"
         user.save(using=self._db)
         return user
 
