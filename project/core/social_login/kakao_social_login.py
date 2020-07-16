@@ -26,7 +26,7 @@ class KakaoSocialLogin():
                 f'이미 {user.social}로 가입했습니다. {user.social}로 로그인 해주세요.')
 
         #username = self._generate_unique_username()
-        user = Profile.objects.create_user(
+        user = Profile.objects.create(
             email=user_data_per_field['email'],
             # username=username,
             # gender=user_data_per_field['gender'],

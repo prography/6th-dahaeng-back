@@ -1,13 +1,19 @@
+from django.contrib.auth.models import update_last_login
+from django.contrib.auth import get_user_model
 from django.shortcuts import redirect
+from core.serializers import ProfileSerializer, UserCoinSerializer
+from core.models import Profile, Jorang
+from core.social_login.kakao_social_login import KakaoSocialLogin
+from record.serializers import UserQuestionSerializer
+from record.models import UserQuestion
+from rest_framework_jwt.settings import api_settings
 from rest_framework import permissions, status, viewsets, permissions
 from rest_framework.response import Response
 from rest_framework.decorators import action, api_view, authentication_classes, permission_classes
-from core.social_login.kakao_social_login import KakaoSocialLogin
-from core.models import Profile
-from .serializers import ProfileSerializer
-import json
-from uuid import uuid4
 import requests
+from uuid import uuid4
+import json
+from datetime import date
 # from accounts.social_login.naver_social_login import NaverSocialLogin
 
 
@@ -47,17 +53,63 @@ class UserSocialViewSet(viewsets.ModelViewSet):
         else:
             user = self.kakao_social_login.sign_up(user_data_per_field)
 
-        URL = 'http://'+request.META['HTTP_HOST'] + '/login/'
-        data = {
-            'email': user.email,
-            'password': user.password
-        }
-        response = requests.post(URL, data=data)
-        breakpoint()
-        # refresh = CustomUserObtainPairSerializer.get_token(user)
+        is_first_login = False
+        User = get_user_model()
+        email = user.email
+        try:
+            profile = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({
+                'response': 'error',
+                'message': '유효하지않은 계정입니다.'
+            })
+
+        if profile.last_login is None:
+            is_first_login = True
+            serializer = UserQuestionSerializer(
+                data={"profile": email}, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+            usercoinSerializer = UserCoinSerializer(data={"profile": email})
+            if usercoinSerializer.is_valid():
+                usercoinSerializer.save()
+
+        else:
+            userq = UserQuestion.objects.get(profile=profile.id)
+            serializer = UserQuestionSerializer(
+                userq, data={"last_login": date.today()}, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+
+        try:
+            jorang = Jorang.objects.get(profile=profile)
+            has_jorang = True
+            jorang_nickname = jorang.nickname
+            jorang_color = jorang.color
+        except Jorang.DoesNotExist:
+            has_jorang = False
+            jorang_nickname = None
+            jorang_color = None
+
+        update_last_login(None, profile)
+
+        jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+        jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+
+        payload = jwt_payload_handler(user)
+        token = jwt_encode_handler(payload)
+
         return Response({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token)
+            'response': 'success',
+            'message': {
+                'token': token,
+                'profile_id': profile.id,
+                'has_jorang': has_jorang,
+                'jorang': {
+                        'nickname': jorang_nickname,
+                        'color': jorang_color
+                }
+            }
         })
 
     def error_with_message(self, e):
