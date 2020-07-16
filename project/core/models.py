@@ -6,7 +6,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 class UserManager(BaseUserManager):
     user_in_migrations = True
 
-    def create_user(self, email, password=None):
+    def create_user(self, email, password=None, social="NONE"):
         if not email:
             raise ValueError('이메일은 필수입니다.')
         # 가독성을 고려하여 kwargs 사용 안함
@@ -17,6 +17,7 @@ class UserManager(BaseUserManager):
         # TODO: 이메일 인증 잠시 보류
         user.status = '1'
         user.role = '0'
+        user.social = social
         user.save(using=self._db)
         return user
 
