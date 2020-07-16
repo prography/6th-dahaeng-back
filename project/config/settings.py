@@ -106,7 +106,7 @@ DATABASES = {
         'NAME': 'Dahaeng',
         'USER': 'Dahaeng',
         'PASSWORD': 'Dahaeng1!',
-        'HOST': 'dahaenginstance.chzp9ckdofcl.ap-northeast-2.rds.amazonaws.com',
+        'HOST': 'ec2-3-34-177-77.ap-northeast-2.compute.amazonaws.com',
         'PORT': '3306',
         'OPTIONS': {
             'init_command': 'SET sql_mode="STRICT_TRANS_TABLES"'
