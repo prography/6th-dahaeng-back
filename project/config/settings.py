@@ -105,9 +105,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'Dahaeng',
         'USER': 'Dahaeng',
-        'PASSWORD': 'Dahaeng1!',
-        'HOST': 'ec2-3-34-177-77.ap-northeast-2.compute.amazonaws.com',
-        'PORT': '3306',
+        'PASSWORD': get_secret('DB_PASSWORD'),
+        'HOST': get_secret('DB_HOST'),
+        'PORT': get_secret('DB_PORT'),
         'OPTIONS': {
             'init_command': 'SET sql_mode="STRICT_TRANS_TABLES"'
             # 'ssl': {'key': os.path.join(BASE_DIR, 'DahaengKey')}
