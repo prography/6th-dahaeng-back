@@ -97,7 +97,8 @@ class ProfileDetailView(APIView):
         usercoin = UserCoin.objects.get(profile=profile.id)
 
         try:
-            post = Post.objects.get(profile=profile.id, created_at=usercoin.last_date)
+            post = Post.objects.get(
+                profile=profile.id, created_at=usercoin.last_date)
             continuity = post.continuity
         except Post.DoesNotExist:
             continuity = 0
@@ -114,20 +115,21 @@ class ProfileDetailView(APIView):
                 'user_coin': usercoin.coin
             }
         })
-    
+
     def post(self, request, profile_id):
         profile = self.get_object(profile_id)
         usercoin = UserCoin.objects.get(profile=profile.id)
 
         try:
-            post = Post.objects.get(profile=profile.id, created_at=usercoin.last_date)
+            post = Post.objects.get(
+                profile=profile.id, created_at=usercoin.last_date)
             continuity = post.continuity
         except Post.DoesNotExist:
             continuity = 0
 
         nickname = request.data.get('nickname')
         title = request.data.get('title')
-        
+
         jorang = Jorang.objects.get(profile=profile.id)
         jorang.nickname = nickname
         jorang.title = title
@@ -145,6 +147,7 @@ class ProfileDetailView(APIView):
                 'user_coin': usercoin.coin
             }
         })
+
 
 @api_view(['GET'])
 @permission_classes([MyIsAuthenticated, ])
@@ -240,7 +243,7 @@ def jorang_create(request):
             'message': 'request body의 파라미터가 잘못되었습니다.'
         })
     profile = request.user
-    color=random_color()
+    color = random_color()
     Jorang.objects.create(
         nickname=nickname,
         color=color,
@@ -249,7 +252,8 @@ def jorang_create(request):
 
     # 개인 아이템 소지 목록에 색 추가
     try:
-        item_id = Item.objects.get(item_type="jorang_color", item_detail=color).id
+        item_id = Item.objects.get(
+            item_type="jorang_color", item_detail=color).id
         serializer = UserItemSerializer(
             data={
                 "profile": profile.email,
@@ -278,6 +282,7 @@ def jorang_create(request):
 class MyObtainJSONWebToken(ObtainJSONWebToken):
     def post(self, request):
         response = super().post(request, content_type='application/json')
+
         if response.status_code != 200:
             return Response({
                 'response': 'error',
@@ -346,13 +351,14 @@ def get_or_none(classmodel, **kwargs):
 
 class AttendanceView(APIView):
     permission_classes = [MyIsAuthenticated, ]
-    
+
     def get(self, request):
         User = get_user_model()
         email = request.user.email
         profile = User.objects.get(email=email)
 
-        attendancer = Attendance.objects.filter(profile=profile, date__year=date.today().year, date__month=date.today().month)
+        attendancer = Attendance.objects.filter(
+            profile=profile, date__year=date.today().year, date__month=date.today().month)
         serializer = AttendanceSerializer(attendancer, many=True)
 
         return Response(serializer.data)
