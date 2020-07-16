@@ -7,7 +7,9 @@ ExecStart=/home/ubuntu/myvenv/bin/uwsgi -i /home/ubuntu/6th-Dahaeng-back/project
 
 
 Restart=always
+StartLimitIntervalSec=0
 KillSignal=SIGQUIT
+
 Type=notify
 StandardError=syslog
 NotifyAccess=all
