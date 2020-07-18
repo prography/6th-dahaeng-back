@@ -3,13 +3,12 @@ Description=uWSGI service
 After=syslog.target
 
 [Service]
-ExecStart=/home/ubuntu/myvenv/bin/uwsgi -i /home/ubuntu/6th-Dahaeng-back/project/config/wsgi/wsgi.ini
+ExecStart=/home/ubuntu/6th-Dahaeng-back/myvenv/bin/uwsgi -i /home/ubuntu/6th-Dahaeng-back/project/config/wsgi/wsgi.ini
 
 
 Restart=always
 StartLimitIntervalSec=0
 KillSignal=SIGQUIT
-
 Type=notify
 StandardError=syslog
 NotifyAccess=all
