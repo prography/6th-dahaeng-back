@@ -14,7 +14,7 @@ import requests
 from uuid import uuid4
 import json
 from datetime import date
-# from accounts.social_login.naver_social_login import NaverSocialLogin
+from core.social_login.naver_social_login import NaverSocialLogin
 
 
 class UserSocialViewSet(viewsets.ModelViewSet):
@@ -25,7 +25,7 @@ class UserSocialViewSet(viewsets.ModelViewSet):
 
     def __init__(self, **kwargs):
         self.kakao_social_login = KakaoSocialLogin()
-        # self.naver_social_login = NaverSocialLogin(self.state_token_code
+        self.naver_social_login = NaverSocialLogin(self.state_token_code)
         super(UserSocialViewSet, self).__init__(**kwargs)
 
     @action(detail=False, methods=['get'], url_path='kakao_login')
@@ -127,59 +127,115 @@ class UserSocialViewSet(viewsets.ModelViewSet):
             return user.social != user_data_per_field['social']
         return False
 
-    # @action(detail=False, methods=['get'], url_path='naver-login')
-    # def get_naver_auth_token(self, request, pk=None):
-    #     url = self.naver_social_login.get_auth_url()
-    #     return redirect(url)
+    @action(detail=False, methods=['get'], url_path='naver_login')
+    def get_naver_auth_token(self, request, pk=None):
+        url = self.naver_social_login.get_auth_url()
+        return redirect(url)
 
-    # @action(detail=False, methods=['get'], url_path='naver-login-callback')
-    # def naver_login_callback(self, request, pk=None):
-    #     callback_status_token_code = request.query_params.get('state')
-    #     if callback_status_token_code != self.naver_social_login.state_token_code:
-    #         return Response({'message': 'state token code is not valid'}, status=status.HTTP_401_UNAUTHORIZED)
+    @action(detail=False, methods=['get'], url_path='naver_login_callback')
+    def naver_login_callback(self, request, pk=None):
+        callback_status_token_code = request.query_params.get('state')
+        if callback_status_token_code != self.naver_social_login.state_token_code:
+            return Response({'message': 'state token code is not valid'}, status=status.HTTP_401_UNAUTHORIZED)
 
-    #     try:
-    #         user_data_per_field = self.naver_social_login.get_user_data(
-    #             request)
-    #     except Exception as e:
-    #         return self.error_with_message(e)
+        try:
+            user_data_per_field = self.naver_social_login.get_user_data(
+                request)
+        except Exception as e:
+            return self.error_with_message(e)
 
-    #     if self._have_already_sign_up_for_other_social(user_data_per_field):
-    #         what_social_did_user_already_sign_up = User.objects.get(
-    #             email=user_data_per_field['email']).social
-    #         return Response({
-    #             'message': f'이미 {what_social_did_user_already_sign_up}로 가입했습니다. {what_social_did_user_already_sign_up}로 로그인 해주세요.'
-    #         }, status=status.HTTP_400_BAD_REQUEST)
+        if self._have_already_sign_up_for_other_social(user_data_per_field):
+            what_social_did_user_already_sign_up = User.objects.get(
+                email=user_data_per_field['email']).social
+            return Response({
+                'message': f'이미 {what_social_did_user_already_sign_up}로 가입했습니다. {what_social_did_user_already_sign_up}로 로그인 해주세요.'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
-    #     if User.objects.filter(email=user_data_per_field['email'], social=user_data_per_field['social']):
-    #         user = self.naver_social_login.login(user_data_per_field)
-    #     else:
-    #         user = self.naver_social_login.sign_up(user_data_per_field)
+        User = get_user_model()
+        if User.objects.filter(email=user_data_per_field['email'], social=user_data_per_field['social']):
+            user = self.naver_social_login.login(user_data_per_field)
+        else:
+            user = self.naver_social_login.sign_up(user_data_per_field)
 
-    #     refresh = CustomUserObtainPairSerializer.get_token(user)
-    #     return Response({
-    #         'refresh': str(refresh),
-    #         'access': str(refresh.access_token)
-    #     })
+        is_first_login = False
+        User = get_user_model()
+        email = user.email
+        try:
+            profile = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({
+                'response': 'error',
+                'message': '유효하지않은 계정입니다.'
+            })
 
-    # def _naver_login_or_sign_up(self, snowflake_user_data):
-    #     email = snowflake_user_data['email']
-    #     social = snowflake_user_data['social']
-    #     user = User.objects.filter(email=email)
+        if profile.last_login is None:
+            is_first_login = True
+            serializer = UserQuestionSerializer(
+                data={"profile": email}, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+            usercoinSerializer = UserCoinSerializer(data={"profile": email})
+            if usercoinSerializer.is_valid():
+                usercoinSerializer.save()
 
-    #     if user.exists():
-    #         user = User.objects.get(email=email)
-    #         if user.social == social:
-    #             user = naver.login(snowflake_user_data)
-    #             return user
-    #         else:
-    #             already_signup_social = user.social
-    #             if already_signup_social == 'NONE':
-    #                 already_signup_social = "눈송이"
-    #             return already_signup_social
+        else:
+            userq = UserQuestion.objects.get(profile=profile.id)
+            serializer = UserQuestionSerializer(
+                userq, data={"last_login": date.today()}, partial=True)
+            if serializer.is_valid():
+                serializer.save()
 
-    #     user = naver.sign_up(snowflake_user_data)
-    #     return user
+        try:
+            jorang = Jorang.objects.get(profile=profile)
+            has_jorang = True
+            jorang_nickname = jorang.nickname
+            jorang_color = jorang.color
+        except Jorang.DoesNotExist:
+            has_jorang = False
+            jorang_nickname = None
+            jorang_color = None
+
+        update_last_login(None, profile)
+
+        jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+        jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+
+        payload = jwt_payload_handler(user)
+        token = jwt_encode_handler(payload)
+
+        return Response({
+            'response': 'success',
+            'message': {
+                'token': token,
+                'profile_id': profile.id,
+                'has_jorang': has_jorang,
+                'jorang': {
+                        'nickname': jorang_nickname,
+                        'color': jorang_color
+                }
+            }
+        })
+
+    def _naver_login_or_sign_up(self, dahaeng_user_data):
+        # 사용 안함
+        User = get_user_model()
+        email = dahaeng_user_data['email']
+        social = dahaeng_user_data['social']
+        user = User.objects.filter(email=email)
+
+        if user.exists():
+            user = User.objects.get(email=email)
+            if user.social == social:
+                user = naver.login(dahaeng_user_data)
+                return user
+            else:
+                already_signup_social = user.social
+                if already_signup_social == 'NONE':
+                    already_signup_social = "눈송이"
+                return already_signup_social
+
+        user = naver.sign_up(dahaeng_user_data)
+        return user
 
 
 # https://kauth.kakao.com/oauth/authorize?client_id={app_key}&redirect_uri={redirect_uri}&response_type=code
