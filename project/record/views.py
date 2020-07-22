@@ -51,7 +51,6 @@ class PostCreateView(APIView):
         if userquestion.question is None or userquestion.last_login != date.today() :
             qid = pick_number()
             try:
-                question = Question.objects.get(pk=qid)
                 serializer = UserQuestionSerializer(
                     userquestion,
                     data={"last_login": date.today(), "question": qid},
