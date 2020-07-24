@@ -51,10 +51,11 @@ class PostCreateView(APIView):
         if userquestion.question is None or userquestion.last_login != date.today() :
             qid = pick_number()
             try:
-                serializer = UserQuestionSerializer(
-                    userquestion,
-                    data={"last_login": date.today(), "question": qid},
-                    partial=True)
+                serializer = UserQuestionSerializer(userquestion,
+                    data={
+                        "profile": email,
+                        "last_login": date.today(),
+                        "question": qid})
                 if serializer.is_valid():
                     serializer.save()
             except Question.DoesNotExist:
