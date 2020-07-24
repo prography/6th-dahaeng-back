@@ -124,17 +124,10 @@ class PostCreateView(APIView):
             usercoin.last_date = today
             usercoin.save()
 
-            post = Post.objects.get(profile=profile, created_at=today)
             return Response({
                 "response": "success", 
                 "message": "성공적으로 일기를 업로드하였습니다.",
-                "post_detail": {
-                    "id": post.id,
-                    "created_at": post.created_at,
-                    "detail": smart_text(post.detail, encoding='utf-16'),
-                    "emotion": post.emotion,
-                    "image": smart_text(post.image, encoding='utf-16'),
-                },
+                "post_detail": serializer.data,
                 "reward_detail": {
                     "reward_of_today": reward,
                     "coin": reward_of_today,
