@@ -139,7 +139,7 @@ class ProfileDetailView(APIView):
             'response': 'success',
             'message': {
                 'email':  profile.email,
-                'personal_title': jorang.title,
+                'title': jorang.title,
                 'jorang_nickname': jorang.nickname,
                 'jorang_color': jorang.color,
                 'jorang_status': jorang.status,
