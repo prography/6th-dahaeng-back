@@ -1,16 +1,10 @@
-import rest_framework
+from django.contrib.auth import get_user_model
+from django.http import Http404
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.contrib.auth import get_user_model
-from core.serializers import ProfileSerializer
-from rest_framework_jwt.views import ObtainJSONWebToken
-from django.contrib.auth.models import update_last_login
-from rest_framework.permissions import AllowAny
+
 from core.models import Jorang, UserCoin
-from rest_framework.decorators import api_view, permission_classes
-from config.permissions import MyIsAuthenticated
-from random import choice
-from django.http import Http404
 
 
 # profile/<int:profile_id>/

@@ -1,12 +1,11 @@
+from datetime import date
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.contrib.auth import get_user_model
-from core.serializers import AttendanceSerializer
 
-from core.models import Jorang, Attendance, Profile
-from rest_framework.decorators import api_view, permission_classes
+from core.serializers import AttendanceSerializer
+from core.models import Attendance, Profile
 from config.permissions import MyIsAuthenticated
-from datetime import date
 
 
 class AttendanceView(APIView):

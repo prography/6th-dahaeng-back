@@ -1,10 +1,17 @@
-import rest_framework
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from core.models import Jorang
-from rest_framework.decorators import api_view, permission_classes
-from config.permissions import MyIsAuthenticated
+"""
+조랭이 모델을 Create 하는 함수들이 정의 되어있습니다.
+조랭이의 세부적인 내용을 추가하는 경우
+profile.py 에서 ProfileDetail 부분을 참고하면 되겠습니다.
+
+"""
 from random import choice
+
+from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes
+
+from core.models import Jorang
+from config.permissions import MyIsAuthenticated
+
 
 
 def random_color():

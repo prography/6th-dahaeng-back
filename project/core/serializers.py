@@ -1,5 +1,4 @@
 from rest_framework import serializers as sz
-from django.contrib.auth import get_user_model
 from core.models import Profile, UserCoin, Attendance
 
 

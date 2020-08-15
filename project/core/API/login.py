@@ -1,18 +1,21 @@
 """
+Profile 의
+login, signup, JWT 등 관련된 부분들을 구현을 해두었다.
 
 """
-import rest_framework
+
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import update_last_login
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.contrib.auth import get_user_model
-from core.serializers import ProfileSerializer, UserCoinSerializer
 from rest_framework_jwt.views import ObtainJSONWebToken
-from django.contrib.auth.models import update_last_login
 from rest_framework.permissions import AllowAny
-from core.models import Jorang
 from rest_framework.decorators import api_view, permission_classes
+
+from core.models import Jorang
+from core.serializers import ProfileSerializer, UserCoinSerializer
 from config.permissions import MyIsAuthenticated
-from random import choice
 
 
 # /sighup/ 회원 가입
@@ -97,10 +100,7 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
         :param request: rest_framework.request.Request
         :return: rest_framework.response.Response
         """
-        print("request", request)
-        print("request.user", request.user)
         response = super().post(request, content_type='application/json')
-        print("response", response)
 
         if response.status_code != 200:
             return Response({
