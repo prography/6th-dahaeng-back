@@ -1,5 +1,6 @@
 from rest_framework import permissions
 
+
 # TODO: 이것도 써야하나?
 # class IsEmailAuthenticated(permissions.BasePermission):
 #     def has_permissions(self, request, view):
@@ -16,9 +17,19 @@ class MyIsAuthenticated(permissions.BasePermission):
     message = ''
 
     def has_permission(self, request, view):
-        # AnonymousUser 가 나올 경우도 있는데, 즉 확인 되지 않은 USER 라는 의미이다.
-        print("MyIsAuthenticated request", request)
+        """
+            JWT -> user -> request.user 에 넣어 지게 되고
+            AbstractUser 을 상속을 하였기 때문에,
+            아래의 속성들을 지원을 해준다.
+            .is_authenticated : 로그인여부 (속성)
+            .is_anonymous : 로그아웃 여부 (속성) -> AnonymousUser
+            jwt 를 통해서, 위 내용을 분석을 할 수 있다.
+
+        """
+        print("request.user.is_anonymous", request.user.is_anonymous)
+        print("request.user.is_authenticated", request.user.is_authenticated)
         print("request.user", request.user)
+
         if request.user.is_anonymous:
             self.message = '유저가 존재하지 않습니다.'
             return False
@@ -35,5 +46,3 @@ class MyIsAuthenticated(permissions.BasePermission):
 
         # message 변경을 위해 변경
         # return bool(request.user and request.user.is_authenticated and request.user.status == '1')
-
-

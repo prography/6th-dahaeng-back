@@ -5,3 +5,5 @@
 """
 
 from config.commons import *
+
+DEBUG = False

@@ -42,7 +42,7 @@ def get_secret(setting, secrets=secrets):
 
 SECRET_KEY = get_secret('SECRET_KEY')
 
-DEBUG = True
+
 
 # TODO: 추후 변경, 나중에 좀더 공부해서 변경을 할 수 있어야 한다.
 ALLOWED_HOSTS = ['*']
@@ -58,7 +58,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     # 내부 Application
-    # 'core',
+    'core',
 ]
 
 MIDDLEWARE = [
@@ -137,7 +137,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
     REST_FRAMEWORK -> JWT 를 사용해서 인증을 하는 방식 이라는 것을 명시해둔다. 
     JWT_AUTH -> jwt 의 만료기간에 대해서 명시를 해두었다.
 """
-# AUTH_USER_MODEL = "core.Profile"
+AUTH_USER_MODEL = "core.Profile"
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
