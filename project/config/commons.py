@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'corsheaders',
     # 내부 Application
     'core',
+    'record',
 ]
 
 MIDDLEWARE = [

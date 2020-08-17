@@ -1,3 +1,8 @@
+"""
+/record/posts/newpost POST 를
+ 통해서 Attendance 를 처음 만들고, 요기서 체크를 한다.
+
+"""
 from datetime import date
 
 from rest_framework.views import APIView

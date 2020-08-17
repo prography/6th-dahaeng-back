@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from core.models import Jorang, UserCoin
+from record.models import Post
 
 
 # profile/<int:profile_id>/
@@ -31,15 +32,12 @@ class ProfileDetailView(APIView):
         jorang = Jorang.objects.get(profile=profile.id)
         usercoin = UserCoin.objects.get(profile=profile.id)
 
-        # TODO: record.Post 구현 이후, 이부분을 수정한다.
-        """
         try:
             post = Post.objects.get(
                 profile=profile.id, created_at=usercoin.last_date)
             continuity = post.continuity
         except Post.DoesNotExist:
             continuity = 0
-        """
 
         return Response({
             'response': 'success',
@@ -49,7 +47,7 @@ class ProfileDetailView(APIView):
                 'jorang_nickname': jorang.nickname,
                 'jorang_color': jorang.color,
                 'jorang_status': jorang.status,
-                'user_continuity': 0,  # TODO: record 구현 이후, 이부분을 수정한다.
+                'user_continuity': continuity,
                 'user_coin': usercoin.coin
             }
         })
@@ -66,15 +64,12 @@ class ProfileDetailView(APIView):
         profile = self.get_object(profile_id)
         usercoin = UserCoin.objects.get(profile=profile.id)
 
-        # TODO: record.Post 구현 이후, 이부분을 수정한다.
-        """
         try:
             post = Post.objects.get(
                 profile=profile.id, created_at=usercoin.last_date)
             continuity = post.continuity
         except Post.DoesNotExist:
             continuity = 0
-        """
 
         nickname = request.data.get('nickname')
         title = request.data.get('title')
@@ -92,7 +87,7 @@ class ProfileDetailView(APIView):
                 'jorang_nickname': jorang.nickname,
                 'jorang_color': jorang.color,
                 'jorang_status': jorang.status,
-                'user_continuity': 0,  # TODO: record 구현 이후, 이부분을 수정한다.
+                'user_continuity': continuity,
                 'user_coin': usercoin.coin
             }
         })

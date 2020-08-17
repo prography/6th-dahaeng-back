@@ -18,7 +18,7 @@ def random_color():
     colors = ["FFE884", "FC9285", "8BAAD8", "F4E9DC", "BD97B4"]
     return choice(colors)
 
-
+# /jorang/
 @api_view(['POST'])
 @permission_classes([MyIsAuthenticated, ])
 def create(request):

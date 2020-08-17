@@ -3,6 +3,7 @@ Profile 의
 login, signup, JWT 등 관련된 부분들을 구현을 해두었다.
 
 """
+from datetime import date
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import update_last_login
@@ -17,6 +18,8 @@ from core.models import Jorang
 from core.serializers import ProfileSerializer, UserCoinSerializer
 from config.permissions import MyIsAuthenticated
 
+from record.serializers import UserQuestionSerializer
+from record.models import UserQuestion
 
 # /sighup/ 회원 가입
 class CreateProfileView(APIView):
@@ -121,14 +124,12 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
         print("profile.last_login", profile.last_login)
 
         if profile.last_login is None:
-            # TODO: record 을 구현을 하면, 그 뒤에 추가를 하자.
-            """
+
             is_first_login = True
             serializer = UserQuestionSerializer(
                 data={"profile": email}, partial=True)
             if serializer.is_valid():
                 serializer.save()
-            """
 
             usercoinSerializer = UserCoinSerializer(data={"profile": email})
             if usercoinSerializer.is_valid():
@@ -136,15 +137,13 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
                 usercoinSerializer.save()
 
         else:
-            pass
-            # TODO: record 을 구현을 하면, 그 뒤에 추가를 하자.
-            """
+
             userq = UserQuestion.objects.get(profile=profile.id)
             serializer = UserQuestionSerializer(
                 userq, data={"last_login": date.today()}, partial=True)
             if serializer.is_valid():
                 serializer.save()
-            """
+
 
         try:
             jorang = Jorang.objects.get(profile=profile)
