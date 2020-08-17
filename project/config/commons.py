@@ -61,6 +61,8 @@ INSTALLED_APPS = [
     'core',
     'record',
     'reminder',
+    'notice',
+    'shop',
 ]
 
 MIDDLEWARE = [

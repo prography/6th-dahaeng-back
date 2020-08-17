@@ -11,7 +11,8 @@ from rest_framework.decorators import api_view, permission_classes
 
 from core.models import Jorang
 from config.permissions import MyIsAuthenticated
-
+from shop.models import Item
+from shop.serializers import UserItemSerializer
 
 
 def random_color():
@@ -58,8 +59,7 @@ def create(request):
             'response': 'fail',
             'message': '조랭이 생성에 실패햐였습니다.'
         })
-    # TODO: 내가 만든거 shop 을 구현을 하면, 그떄 추가로 구현 예정.
-    """
+
     # 개인 아이템 소지 목록에 색 추가
     try:
         item_id = Item.objects.get(
@@ -82,7 +82,7 @@ def create(request):
             'response': 'error',
             'message': '존재하지 않는 조랭이 색입니다. 상점에 색 아이템을 추가하세요!'
         })
-    """
+
 
     return Response({
         'response': 'success',

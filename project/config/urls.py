@@ -21,5 +21,8 @@ urlpatterns = [
     path('', include('core.urls')),
     path('record/', include('record.urls')),
     path('reminder/', include('reminder.urls')),
+    path('notice/', include('notice.urls')),
+    path('shop/', include('shop.urls')),
+    path('api-auth/', include('rest_framework.urls')),
 
 ]
