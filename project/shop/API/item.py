@@ -1,14 +1,12 @@
-from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 
 from django.http import Http404
-from django.contrib.auth import get_user_model
 from config.permissions import MyIsAuthenticated
-from core.models import UserCoin, Jorang
-from core.serializers import UserCoinSerializer
+from core.ERROR.error_cases import GlobalErrorMessage
+from core.models import UserCoin, Profile
 from shop.models import Item, UserItem
 from shop.serializers import ItemSerializer, UserItemSerializer
 
@@ -22,9 +20,9 @@ def get_item_list_user_had_or_not(request):
         user 가 가지고 있는 것과 비교를 하여,
         user 가 소유를 하고 있는 item list 와 user 가 소유하고 있지 않는 item list 를 찾아서 Return 한다.
     """
-    User = get_user_model()
+
     email = request.user.email
-    profile = User.objects.get(email=email)
+    profile = Profile.objects.get(email=email)
 
     try:
         had_item_list = UserItem.objects.filter(profile=profile).values('item').distinct()
@@ -45,7 +43,7 @@ def get_item_list_user_had_or_not(request):
 
 # /item/create/ POST
 @api_view(['POST'])
-@permission_classes([MyIsAuthenticated, ])  # IsAdminUser
+@permission_classes([IsAdminUser, ])  # IsAdminUser, MyIsAuthenticated
 def admin_create_item(request):
     """
         Admin 이 아이템을 만들기위해서,
@@ -96,23 +94,16 @@ def user_buy_item(request):
     try:
         item_pk = int(request.data["item"])
     except KeyError:
-        return Response({
-            'response': 'error',
-            'message': 'item : pk 가 존재 하지 않습니다.'
-        })
+        raise GlobalErrorMessage('item : pk 가 존재 하지 않습니다.')
+
     except ValueError:
-        return Response({
-            'response': 'error',
-            'message': 'pk에 숫자가 들어 있지 않습니다.'
-        })
+        raise GlobalErrorMessage('pk에 숫자가 들어 있지 않습니다.')
 
     try:
         item = Item.objects.get(pk=item_pk)
     except Item.DoesNotExist:
-        return Response({
-            'response': 'error',
-            'message': 'pk 에 해당하는 Item 이 없습니다.'
-        })
+        raise GlobalErrorMessage('pk 에 해당하는 Item 이 없습니다.')
+
     price = item.item_price
     user_coin = UserCoin.objects.get(profile=request.user.pk)
 
@@ -128,12 +119,6 @@ def user_buy_item(request):
                 "coin": user_coin.coin,
                 "message": "아이템을 성공적으로 구매했습니다."
             })
-        return Response({
-            "response": "error",
-            "message": serializer.errors
-        })
-    else:
-        return Response({
-            "response": "error",
-            "message": "코인이 부족합니다."
-        })
+        raise GlobalErrorMessage(str(serializer.errors))
+
+    raise GlobalErrorMessage("코인이 부족합니다.")
