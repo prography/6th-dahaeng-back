@@ -1,4 +1,5 @@
 from django.db.utils import IntegrityError
+from rest_framework.permissions import IsAdminUser
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -15,8 +16,8 @@ class QuestionView(APIView):
         그것들을 질문 LIST 로 만드는 느낌이다.
     """
 
-    permission_classes = [MyIsAuthenticated]
-    # permission_classes = [IsAdminUser]
+    # permission_classes = [MyIsAuthenticated]
+    permission_classes = [IsAdminUser]
 
     def get(self, request, format=None):
         """

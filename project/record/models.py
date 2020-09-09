@@ -24,6 +24,9 @@ class Question(models.Model):
 
 
 class Post(models.Model):
+    """
+        유저가 작성하는 포스터이다.
+    """
     EMOTION_CHOICES = [
         ('WARM', "따뜻했어요"),
         ('FUN', "즐거웠어요"),
@@ -52,6 +55,9 @@ class Post(models.Model):
 
 
 class UserQuestion(models.Model):
+    """
+        매일 유저에게 새로운 질문을 매칭을 해주기 위해서, 구현이 되었다.
+    """
     profile = models.OneToOneField(Profile, on_delete=models.CASCADE)
     last_login = models.DateField(null=True)
     question = models.ForeignKey(

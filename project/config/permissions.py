@@ -24,11 +24,7 @@ class MyIsAuthenticated(permissions.BasePermission):
             .is_authenticated : 로그인여부 (속성)
             .is_anonymous : 로그아웃 여부 (속성) -> AnonymousUser
             jwt 를 통해서, 위 내용을 분석을 할 수 있다.
-
         """
-        print("request.user.is_anonymous", request.user.is_anonymous)
-        print("request.user.is_authenticated", request.user.is_authenticated)
-        print("request.user", request.user)
 
         if request.user.is_anonymous:
             self.message = '유저가 존재하지 않습니다.'

@@ -26,9 +26,7 @@ class UserManager(BaseUserManager):
 
     def create_user(self, email, password=None, social="NONE"):
         """
-        신규 사용자(Profile )을 만들어 내는 과정
-        TODO: 이메일 인증 잠시 보류
-        TODO: self._db 이거 None 이던데 왜 사용을 하는 거지?
+        신규 사용자(Profile)을 만들어 내는 과정
 
         :param email: 신규 사용자의 email.
         :param password: 신규 사용자의 password.
@@ -42,7 +40,7 @@ class UserManager(BaseUserManager):
         )
         user.set_password(password)
 
-        user.status = '1'
+        user.status = '0'
         user.role = '0'
         user.social = social
         user.save(using=self._db)
@@ -51,8 +49,7 @@ class UserManager(BaseUserManager):
 
     def create_superuser(self, email, password=None):
         """
-            신규 관리자(Profile )을 만들어 내는 과정
-            TODO: 이메일 인증 잠시 보류
+            신규 관리자(Profile)을 만들어 내는 과정
 
             :param email: 신규 관리자의 email.
             :param password: 신규 관리자의 password.
@@ -104,8 +101,9 @@ class Profile(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=50, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    # 모든 유저는 가입대기 부터 시작한다.
     status = models.CharField(
-        max_length=2, choices=STATUS_CHOICES, blank=True, default='1')
+        max_length=2, choices=STATUS_CHOICES, blank=True, default='0')
     role = models.CharField(
         max_length=2, choices=ROLE_CHOICES, blank=True, default='0')
     social = models.CharField(
@@ -141,11 +139,11 @@ class Jorang(models.Model):
         ('3', '성숙기')
     )
 
+    profile = models.OneToOneField(
+        Profile, null=True, on_delete=models.CASCADE)
     nickname = models.CharField(max_length=50)
     color = models.CharField(max_length=6, help_text='16진수 코드 6개 ex) FFFFFF')
     status = models.CharField(max_length=2, choices=STATUS_CHOICES, default=0)
-    profile = models.OneToOneField(
-        Profile, null=True, on_delete=models.CASCADE)
     title = models.CharField(max_length=100, default="Da:haeng")
 
     def __str__(self):
@@ -168,6 +166,8 @@ class Attendance(models.Model):
         1:N relation 이며,
         하나의 Profile(USER) 에 대해서, N 개의 출석이 있을 것이고,
         그 출석들을 저장을 하기위해서 만든 모델입니다.
+
+        출석은 record.models.Post 객체를 생성을 할 때, 출석을 하였다고 판단을 합니다.
     """
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     date = models.DateField(null=False)

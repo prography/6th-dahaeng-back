@@ -42,8 +42,6 @@ def get_secret(setting, secrets=secrets):
 
 SECRET_KEY = get_secret('SECRET_KEY')
 
-
-
 # TODO: 추후 변경, 나중에 좀더 공부해서 변경을 할 수 있어야 한다.
 ALLOWED_HOSTS = ['*']
 
@@ -96,7 +94,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
@@ -120,7 +117,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Seoul'
 
 USE_I18N = True
 
@@ -144,6 +141,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 AUTH_USER_MODEL = "core.Profile"
 
 REST_FRAMEWORK = {
+    # Global Error Handler 정의 해둔 곳
+    'EXCEPTION_HANDLER': 'core.ERROR.error_handler.custom_exception_handler',
     'DEFAULT_PERMISSION_CLASSES': (
         'config.permissions.MyIsAuthenticated',
     ),
@@ -185,3 +184,14 @@ CORS_ALLOW_HEADERS = (
     'x-csrftoken',
     'x-requested-with',
 )
+
+"""
+                Email Send 설정
+"""
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_TLS = True
+EMAIL_HOST = get_secret('EMAIL_HOST')
+EMAIL_HOST_USER = get_secret('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = get_secret('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = get_secret('EMAIL_PORT')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

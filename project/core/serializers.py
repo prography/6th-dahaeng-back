@@ -28,13 +28,15 @@ class UserCoinSerializer(sz.ModelSerializer):
 
     def create(self, validated_data):
         """
-        profile = models.OneToOneField(Profile, on_delete=models.CASCADE)
-        이것을 바탕으로 보았을 때, 바로 저 Profile 객체를 지칭을 하여 넘겨주어야 할 필요성이 있어 보인다.
+        SlugRelatedField 를 통해서, queryset 을 통해서 들고온 List 와 slug_field=email 에서  비교를 통해,
+        {profile: shrldh3576@naver.com} 을 비교를 하여,
+        Email 필드와 비교를 하여, 같은 인자를 찾아서
+        데이터를 정제하여, Profile 객체 형태로 validated_data 에 넣어서 보내준다.
 
         :param validated_data: {'profile': <Profile: test1@naver.com>}
          이고, 그 이외의 값의 경우 model.UserCoin 의 default 값으로 변경이 됩니다.
-        :return:
         """
+
         return UserCoin.objects.create(**validated_data)
 
     def update(self, instance, validated_data):

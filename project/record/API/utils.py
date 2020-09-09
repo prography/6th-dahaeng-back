@@ -1,8 +1,11 @@
-from record.models import Post, Question
 from random import randint
 from calendar import monthrange
 from datetime import date
+
 from core.models import UserCoin
+from core.ERROR.error_cases import GlobalErrorMessage
+
+from record.models import Post, Question, UserQuestion
 
 
 def pick_question_pk_number():
@@ -26,8 +29,8 @@ def calculate_continuity_and_reward(profile_pk: int, created_at: date, today: da
     :return: reward: continuity 에 대한 보상
     """
     try:
-        lastPost = Post.objects.get(profile=profile_pk, created_at=created_at)
-        continuity = lastPost.continuity + 1
+        last_post = Post.objects.get(profile=profile_pk, created_at=created_at)
+        continuity = last_post.continuity + 1
     except Post.DoesNotExist:
         continuity = 1
 
@@ -65,3 +68,16 @@ def update_user_coin_with_reward(user_coin: UserCoin, reward: int, today: date):
     user_coin.last_date = today
     user_coin.save()
     return coin
+
+
+def get_question_of_user_question(profile_pk):
+    try:
+        return UserQuestion.objects.get(profile=profile_pk).question
+    except UserQuestion.DoesNotExist:
+        raise GlobalErrorMessage("유저에게 오늘의 질문을 할당을 해주세요.")
+
+
+def fix_image_name(image_name):
+    if image_name.count('"') == 1:
+        image_name = image_name.replace('"', '')
+    return image_name

@@ -1,25 +1,7 @@
 """
-REST 란?
-HTTP URI(Uniform Resource Identifier)를 통해 자원(Resource)을 명시하고,
- HTTP Method(POST, GET, PUT, DELETE)를 통해 해당 자원에 대한 CRUD Operation을 적용하는 것을 의미한다.
-
-TODO: 관리자만, 질문을 생성 및 접근을 할 수 있는데, 이 부분을 확인을 하고 싶다.
 질문 생성 및 List 접근
 /questions GET 질문 List 를 관리자로써 접근을 할 수 있다.
 /questions POST 관리자로서 질문을 생성한다.
-
-----------------------------------------------------------------
-
-원래
-path('posts/newpost/', post.PostCreateView.as_view(), name='post_create'),
-path('posts/', views.PostList.as_view(), name='post_list'),
-path('posts/<int:pk>/', views.PostDetail.as_view(), name='post_detail'),
-
--> 수정 구상본
-posts/question/ -> FBV 로 GET method 하나만 따로 정의| user_question 생성
-posts/ -> get search 할수 있는 기능을 따로 넣어주어야 원래 있는 기능과 모순이 안 생김, 원래대로 구현 예정
-posts/ -> create
-posts/<int:pk> -> detail | get put delete
 
 ----------------------------------------------------------------
 1. questions/
