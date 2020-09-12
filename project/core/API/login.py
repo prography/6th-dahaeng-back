@@ -35,15 +35,6 @@ from record.models import UserQuestion
 class CreateProfileView(APIView):
     permission_classes = [AllowAny]
 
-    def get(self, request, *args, **kwargs):
-        """
-            TODO: 제거 필요, 모든 사용자가 Email 에 접근을 해야할 필요성은 없음. 그렇기 때문에, 지워두어야 할 필요성이 있음.
-            모든 사용자의 EMAIL 을 접근을 하여, 들고옴.
-        """
-        queryset = Profile.objects.all()
-        serializer = ProfileSerializer(queryset, many=True)
-        return Response(serializer.data)
-
     def post(self, request, *args, **kwargs):
         """
             신규 사용자의 email 과 password 를 받아.

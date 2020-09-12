@@ -2,7 +2,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils.encoding import smart_str
 from rest_framework.relations import RelatedField
 
-
+# TODO: 성은 수정 예정.
 class QuestionRelatedField(RelatedField):
     def __init__(self, slug_field=None, **kwargs):
         assert slug_field is not None, 'The `slug_field` argument is required.'

@@ -1,3 +1,6 @@
+"""
+    추후 논의 후: 삭제 고려 대상, 서비스 언급이 없을 경우,
+"""
 from django.db.utils import IntegrityError
 from rest_framework.permissions import IsAdminUser
 
@@ -46,6 +49,6 @@ class QuestionView(APIView):
             return Response({
                 "response": "error",
                 "message": "같은 질문을 Upload 하였습니다."
-            }, status=status.HTTP_201_CREATED)
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

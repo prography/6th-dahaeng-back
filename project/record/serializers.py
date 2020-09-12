@@ -13,7 +13,6 @@ class QuestionSerializer(sz.ModelSerializer):
     content = sz.CharField(max_length=512)
 
     def create(self, validated_data):
-        print("QuestionSerializer validated_data", validated_data)
         return Question.objects.create(**validated_data)
 
     class Meta:

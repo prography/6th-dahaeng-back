@@ -25,6 +25,9 @@ def everyday_user_question_generation(request):
         매일 사람들에게 개인별로 Question 을 생성을 해주기 위해서 만든 API 입니다.
         model Question 에 관리자가 넣어둔 question 들중 하나를 들고온다.
         그리고 그것을 user_question 에 update 한다.
+
+        TODO: 질문이 안 바뀐다? -> 그러면 식상 할 것 같으니, 유저가 똑같은 질문을 받지 않게 짜야한다.
+        TODO: 다음 버젼 고쳐봐야겠다.
     """
     email = request.user.email
     profile = Profile.objects.get(email=email)
@@ -52,6 +55,7 @@ def everyday_user_question_generation(request):
     return Response(sz.data)
 
 
+# TODO : naming 고치기
 class PostView(APIView):
     permission_classes = [MyIsAuthenticated, ]
     parser_classes = (FormParser, MultiPartParser,)
@@ -73,6 +77,7 @@ class PostView(APIView):
             raise GlobalErrorMessage400("search_fields 와 search 가 mapping 이 되지 않습니다. 확인해주세요")
 
         filter_dictionary = {"profile": self.request.user.pk}
+        # TODO : enumerator 라고 바꾸는 게 좀더 pythonic 하다.
         for i in range(0, len(search_fields)):
             filter_dictionary[search_fields[i]] = search_values[i]
         filter_post = Post.objects.all().filter(**filter_dictionary)
@@ -85,11 +90,6 @@ class PostView(APIView):
             하루에 한번만 새로운 Post 를 작성할 수 있는 기능으로,
             emotion, detail, image 를 request 를 통해 받아서 Post model 에 넣어줍니다.
             이를 통해, reward 와 continuity 를 계산하여, user_coin 의 값을 Update 할 수 있습니다
-
-            _mutable 을 아래와 같이 해둔 이유는 request 에 포함이 된,
-             image 데이터를 처리를 하기위해서 만들어 두었다.
-             Parserfrom 이 multitype 이라, 수정이 안되는 것을 수정 가능하도록 바꾸어 주는 용도이다.
-
         """
 
         email = request.user.email
@@ -116,25 +116,26 @@ class PostView(APIView):
         data._mutable = _mutable
         post_serializer = PostSerializer(data=data)
         # 이미 요기서 created_at 이 unique 이기 때문에, 하루에 중복되는 생성은 일어나지 않는다.
-        if post_serializer.is_valid():
-            post_serializer.save()
-            Attendance.objects.create(
-                profile=profile,
-                date=today,
-                emotion=data['emotion'])
+        if not post_serializer.is_valid():
+            raise GlobalErrorMessage400(str(post_serializer.errors))
 
-            coin: int = update_user_coin_with_reward(user_coin=user_coin, reward=reward, today=today)
+        post_serializer.save()
+        Attendance.objects.create(
+            profile=profile,
+            date=today,
+            emotion=data['emotion'])
 
-            return Response({
-                "response": "success",
-                "message": "성공적으로 일기를 업로드하였습니다.",
-                "post_detail": post_serializer.data,
-                "reward_detail": {
-                    "reward_of_today": reward,
-                    "coin": coin,
-                    "continuity": continuity
-                }}, status=status.HTTP_201_CREATED)
-        raise GlobalErrorMessage400(str(post_serializer.errors))
+        coin: int = update_user_coin_with_reward(user_coin=user_coin, reward=reward, today=today)
+
+        return Response({
+            "response": "success",
+            "message": "성공적으로 일기를 업로드하였습니다.",
+            "post_detail": post_serializer.data,
+            "reward_detail": {
+                "reward_of_today": reward,
+                "coin": coin,
+                "continuity": continuity
+            }}, status=status.HTTP_201_CREATED)
 
 
 # ---------------------------------------------------------------------------------
@@ -181,29 +182,24 @@ class PostDetail(APIView):
         # 이름의 확장자가 jpg" 으로 되는 경우가 있어서, 수정을 하였다.
         request.data["image"].name = fix_image_name(image_name=request.data["image"].name)
 
-        if post.profile == profile or profile.role == 10:
-
-            post_serializer = PostSerializer(post, data=request.data, partial=True)
-            if post_serializer.is_valid():
-                post_serializer.save()
-                return Response({
-                    "response": "success",
-                    "message": "성공적으로 수정하였습니다."})
-            raise GlobalErrorMessage400(str(post_serializer.errors))
-        raise GlobalErrorMessage("다른 사람의 일기는 볼 수 없어요.")
+        post_serializer = PostSerializer(post, data=request.data, partial=True)
+        if post_serializer.is_valid():
+            post_serializer.save()
+            return Response({
+                "response": "success",
+                "message": "성공적으로 수정하였습니다."})
+        raise GlobalErrorMessage400(str(post_serializer.errors))
 
     def delete(self, request, pk, format=None):
         post = self.get_post_object(pk)
         email = request.user.email
         profile = Profile.objects.get(email=email)
-        usercoin = UserCoin.objects.get(profile=profile.id)
+        user_coin = UserCoin.objects.get(profile=profile.id)
 
-        if post.profile == profile or profile.role == 10:
-            if post.created_at == usercoin.last_date:
-                raise GlobalErrorMessage("마지막 기록은 지울 수 없습니다.")
-            post.delete()
-            return Response({
-                'response': 'success',
-                'message': '기록을 삭제하였습니다.'
-            }, status=status.HTTP_204_NO_CONTENT)
-        raise GlobalErrorMessage("다른 사람의 일기는 삭제할 수 없어요.")
+        if post.created_at == user_coin.last_date:
+            raise GlobalErrorMessage("마지막 기록은 지울 수 없습니다.")
+        post.delete()
+        return Response({
+            'response': 'success',
+            'message': '기록을 삭제하였습니다.'
+        }, status=status.HTTP_204_NO_CONTENT)

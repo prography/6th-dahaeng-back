@@ -12,27 +12,9 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 
 
 class UserManager(BaseUserManager):
-    """
-        Custom User Model 을 구현 하기 위해서는 BaseUserManager, AbstractBaseUser 를 상속을 받아 구현을 해야한다.
-        BaseUserModel -> 유저를 생성을 할 떄, 사용하는 Helper Class 이다.
-        create_user(*username_field*, password=None, **other_fields)
-        create_superuser(*username_field*, password, **other_fields) 을 각각을 구현을 해야하는 데,
-        우리는 email 로 username_field 를 대신을 한다.
-
-        # 아마 django.contrib.authenticate 부분에서도, email 과 password 를 parameter 로 받는 이유라고 생각한다.
-    """
-
     user_in_migrations = True
 
     def create_user(self, email, password=None, social="NONE"):
-        """
-        신규 사용자(Profile)을 만들어 내는 과정
-
-        :param email: 신규 사용자의 email.
-        :param password: 신규 사용자의 password.
-        :param social: 신규 사용자의 네이버 or Kakao or Google or Apple 등등 계정을 의미한다.
-        :return: 새로 생성된, 신규 사용자.
-        """
         if not email:
             raise ValueError('이메일은 필수입니다.')
         user = self.model(
@@ -48,14 +30,6 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password=None):
-        """
-            신규 관리자(Profile)을 만들어 내는 과정
-
-            :param email: 신규 관리자의 email.
-            :param password: 신규 관리자의 password.
-            :param social: 신규 관리자의 네이버 or Kakao or Google or Apple 등등 계정을 의미한다.
-            :return: 새로 생성된, 신규 관리자.
-        """
         user = self.create_user(
             email=email,
             password=password,

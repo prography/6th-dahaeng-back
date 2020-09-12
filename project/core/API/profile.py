@@ -25,6 +25,7 @@ class ProfileDetailView(APIView):
         profile, user_coin, user_continuity, jorang 에 관한 정보들을 넘겨준다.
 
         TODO: orm 개선
+        TODO: permission denined 를 custom 해서 할 수 있게 해야한다.
         """
         # 본인의 정보만 가져와야 한다.
         if int(request.user.pk) != int(profile_id):
