@@ -8,7 +8,6 @@ from config.settings.commons import *
 
 DEBUG = True
 
-
 """
                                     DB 설정 
                     추후 다른 서버로 옮기게 될 경우, 이부분을 바꾸어야한다.
@@ -21,3 +20,6 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

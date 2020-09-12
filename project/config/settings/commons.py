@@ -55,6 +55,9 @@ INSTALLED_APPS = [
     # 외부 Application
     'rest_framework',
     'corsheaders',
+    'storages',  # AWS S# 관련 APP
+    'django_crontab',  # 일정 시간에 자동으로, Reminder 앱을 자동으로 할 수 있도록 하는 것.
+
     # 내부 Application
     'core',
     'record',
@@ -129,9 +132,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 """
     AUTH_USER_MODEL -> 기존의 USER MODEL 을 바꾸어준다. core.Profile 로 이동
