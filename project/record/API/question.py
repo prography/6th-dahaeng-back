@@ -7,7 +7,6 @@ from rest_framework import status
 
 from record.models import Question
 from record.serializers import QuestionSerializer
-from config.permissions import MyIsAuthenticated
 
 
 class QuestionView(APIView):

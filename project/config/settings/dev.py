@@ -4,7 +4,7 @@
 
 """
 
-from config.commons import *
+from config.settings.commons import *
 
 DEBUG = True
 

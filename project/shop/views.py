@@ -1,13 +1,11 @@
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
 
 from django.http import Http404
 from django.contrib.auth import get_user_model
 from config.permissions import MyIsAuthenticated
-from core.models import UserCoin, Jorang
-from core.serializers import UserCoinSerializer
+from core.models import Jorang
 from shop.models import Item, UserItem
 from shop.serializers import ItemSerializer, UserItemSerializer
 
