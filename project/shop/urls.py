@@ -3,6 +3,8 @@ from .API import item
 from .API import closet
 
 urlpatterns = [
+    # TODO : Item list 들을 보내주는 API 더 추가.
+
     # 유저가 아이템 리스트에 대해서, 현재 본인이 가지고 있고 없고를 List 로 돌려주는 용도이다.
     path('item/user/', item.get_item_list_user_had_or_not, name='item_user_list'),
 

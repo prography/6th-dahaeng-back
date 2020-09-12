@@ -19,11 +19,13 @@ def send_email_for_active(profile, request):
     """
     # 프론트, 백앤드 서버가 나뉘어 있어서 current_site 가 의미가 없다.
     # current_site = get_current_site(request)
+
+    # TODO: 나중에, 버튼으로 간편하게 이동 할 수 있도록 구현을 해야겠다.
+    # TODO: Celery 로 바꾸어서 구현을 하자. - by 경준.
     message = render_to_string(
         'core/email_for_active.html',
         {
-            # 'domain': current_site.domain,
-            'profile_id': urlsafe_base64_encode(force_bytes(profile.id)).encode().decode(),
+            'profile_id': urlsafe_base64_encode(force_bytes(profile.id)),
             'token': account_activation_token.make_token(profile),
         }
     )

@@ -14,6 +14,7 @@ class ReminderView(APIView):
 
     # TODO: 사용자가 하루에 한 번씩 요청을 보내는 것 보다는 cronjob으로 바꾸자.
     # TODO: 날짜 계산을 어떻게 해야하지? 단순히 7일전 30일전 365일전?
+    # TODO:
     def get(self, request, *args, **kwargs):
         """
             오늘 다시 알려줄 Remind 가 있는지 확인을 하고,

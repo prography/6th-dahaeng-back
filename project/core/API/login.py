@@ -137,7 +137,7 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
             if not profile.is_active:
                 raise GlobalErrorMessage('활성화 되지 않은 계정입니다. 메일을 확인하고, 본인인증을 해주세요.')
         except Profile.DoesNotExist:
-            GlobalErrorMessage('유효하지않은 계정입니다.')
+            raise GlobalErrorMessage('유효하지않은 계정입니다.')
 
         # jwt token get
         response = super().post(request, content_type='application/json')
@@ -188,6 +188,7 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
         })
 
 
+# TODO: 없애되기는 히지만, 계속 놔두는게 개발에 도움이 될 것.
 # / 로그인 되었나 확인 하는 용도
 @api_view(['GET'])
 @permission_classes([MyIsAuthenticated, ])
