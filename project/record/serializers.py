@@ -7,7 +7,13 @@ from datetime import date
 
 
 class QuestionSerializer(sz.ModelSerializer):
+    """
+        validated_data 를 통해서
+    """
     content = sz.CharField(max_length=512)
+
+    def create(self, validated_data):
+        return Question.objects.create(**validated_data)
 
     class Meta:
         model = Question
@@ -16,7 +22,7 @@ class QuestionSerializer(sz.ModelSerializer):
 
 class PostSerializer(sz.ModelSerializer):
     profile = sz.SlugRelatedField(
-        queryset=Profile.objects.all(), slug_field='email',)
+        queryset=Profile.objects.all(), slug_field='email', )
     emotion = sz.ChoiceField(choices=Post.EMOTION_CHOICES)
     question = sz.SlugRelatedField(
         queryset=Question.objects.all(), slug_field='content')
@@ -53,7 +59,7 @@ class PostSerializer(sz.ModelSerializer):
 
 class UserQuestionSerializer(sz.ModelSerializer):
     profile = sz.SlugRelatedField(
-        queryset=Profile.objects.all(), slug_field='email',)
+        queryset=Profile.objects.all(), slug_field='email', )
     question = QuestionRelatedField(
         queryset=Question.objects.all(), slug_field='id')
 

@@ -1,17 +1,16 @@
 from rest_framework import serializers as sz
-from django.contrib.auth import get_user_model
 from core.models import Profile, UserCoin, Attendance
+
 
 class ProfileSerializer(sz.ModelSerializer):
     password = sz.CharField(write_only=True)
 
     def create(self, validated_data):
-        Profile = get_user_model()
         profile = Profile.objects.create_user(**validated_data)
         return profile
 
     class Meta:
-        model = get_user_model()
+        model = Profile
         fields = [
             'password',
             'email'
@@ -20,7 +19,10 @@ class ProfileSerializer(sz.ModelSerializer):
 
 class UserCoinSerializer(sz.ModelSerializer):
     profile = sz.SlugRelatedField(queryset=Profile.objects.all(), slug_field='email')
-    
+
+    def create(self, validated_data):
+        return UserCoin.objects.create(**validated_data)
+
     def update(self, instance, validated_data):
         instance.coin = validated_data.get('coin', instance.coin)
         instance.last_date = validated_data.get('last_date', instance.last_date)

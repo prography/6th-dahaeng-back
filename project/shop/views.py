@@ -1,41 +1,36 @@
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
 
 from django.http import Http404
 from django.contrib.auth import get_user_model
 from config.permissions import MyIsAuthenticated
-from core.models import UserCoin, Jorang
-from core.serializers import UserCoinSerializer
+from core.models import Jorang
 from shop.models import Item, UserItem
 from shop.serializers import ItemSerializer, UserItemSerializer
 
-class ItemListView(APIView):
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ------------------------------------------------------
+
+
+
+class AItemCreateView(APIView):
     permssion_classes = [MyIsAuthenticated, ]
-    
-    def get(self, request):
-        User = get_user_model()
-        email = request.user.email
-        profile = User.objects.get(email=email)
-
-        try:
-            had_item_list = UserItem.objects.filter(profile=profile).values('item').distinct()
-            had_items = Item.objects.filter(id__in=had_item_list)
-            not_had_items = Item.objects.exclude(id__in=had_item_list)
-        except UserItem.DoesNotExist:
-            had_items = {}
-            not_had_items = Item.objects.all()
-        had_sz = ItemSerializer(had_items, many=True)
-        not_had_sz = ItemSerializer(not_had_items, many=True)
-
-        return Response({
-            "had_items" : had_sz.data,
-            "not_had_items" : not_had_sz.data
-        })
-
-class ItemCreateView(APIView):
-    permission_classes = [IsAdminUser]
+    # permission_classes = [IsAdminUser]
 
     def post(self, request, format=None):
         serializer = ItemSerializer(data=request.data)
@@ -46,9 +41,10 @@ class ItemCreateView(APIView):
                 'message': '성공적으로 아이템을 업로드하였습니다.'
             }, status=status.HTTP_201_CREATED)
         return Response({
-            "response": "error", 
+            "response": "error",
             "message": serializer.errors
-            }, status=status.HTTP_400_BAD_REQUEST)
+        }, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ItemDetailView(APIView):
     permission_classes = [MyIsAuthenticated, ]
@@ -58,41 +54,42 @@ class ItemDetailView(APIView):
             return Item.objects.get(pk=pk)
         except:
             raise Http404
-    
+
     def get(self, request, pk, format=None):
         item = self.get_object(pk)
         serializer = ItemSerializer(item)
         return Response(serializer.data)
 
-    def post(self, request, pk, format=None):
-        item = self.get_object(pk)
-        price = item.item_price
-        usercoin = UserCoin.objects.get(profile=request.user.pk)
+    # def post(self, request, pk, format=None):
+    #     item = self.get_object(pk)
+    #     price = item.item_price
+    #     usercoin = UserCoin.objects.get(profile=request.user.pk)
+    #
+    #     if usercoin.coin >= price:
+    #         request.data['profile'] = request.user.email
+    #         serializer = UserItemSerializer(data=request.data)
+    #         if serializer.is_valid():
+    #             serializer.save()
+    #             usercoin.coin -= price
+    #             usercoin.save()
+    #             return Response({
+    #                 "response": "success",
+    #                 "coin": usercoin.coin,
+    #                 "message": "아이템을 성공적으로 구매했습니다."
+    #             })
+    #         return Response({
+    #             "response": "error",
+    #             "message": serializer.errors
+    #         })
+    #     else:
+    #         return Response({
+    #             "response": "error",
+    #             "message": "코인이 부족합니다."
+    #         })
 
-        if usercoin.coin >= price:
-            request.data['profile']=request.user.email
-            serializer = UserItemSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                usercoin.coin -= price
-                usercoin.save()
-                return Response({
-                    "response": "success",
-                    "coin": usercoin.coin,
-                    "message": "아이템을 성공적으로 구매했습니다."
-                })
-            return Response({
-                "response": "error",
-                "message": serializer.errors
-            })
-        else:
-            return Response({
-                "response": "error",
-                "message": "코인이 부족합니다."
-            })
 
 class MyClosetView(APIView):
-    permission_classes = (MyIsAuthenticated, )
+    permission_classes = (MyIsAuthenticated,)
 
     def get(self, request):
         User = get_user_model()
@@ -102,21 +99,22 @@ class MyClosetView(APIView):
         useritems = UserItem.objects.all().filter(profile=profile.pk)
         serializer = UserItemSerializer(useritems, many=True)
         return Response(serializer.data)
-    
+
     def post(self, request, format=None):
         profile = request.user
         colorId = request.data.get('color').get('item')
         item = Item.objects.get(id=colorId)
-        
+
         # 조랭이 색 착용
         try:
             # 같은 타입의 다른 아이템 벗기
             try:
-                useritem = UserItem.objects.filter(profile=profile.pk, item__item_type=item.item_type).exclude(item__item_detail=item.item_detail)
+                useritem = UserItem.objects.filter(profile=profile.pk, item__item_type=item.item_type).exclude(
+                    item__item_detail=item.item_detail)
                 useritem.update(is_worn=False)
             except UserItem.DoesNotExist:
                 pass
-            
+
             try:
                 usercolor = UserItem.objects.get(profile=profile.pk, item=colorId)
                 usercolor.is_worn = True
