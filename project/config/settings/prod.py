@@ -8,15 +8,16 @@ import os
 from config.settings.commons import *
 
 DEBUG = False
+ALLOWED_HOSTS = ['*']
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': '디비이름',
-        'USER': '유저이름',
-        'PASSWORD': '비밀번호',
-        'HOST': '엔드포인트',
-        'PORT': '5432',
+        'NAME': get_secret('DB_NAME'),
+        'USER': get_secret('DB_USER'),
+        'PASSWORD': get_secret('DB_PASSWORD'),
+        'HOST': get_secret('DB_HOST'),
+        'PORT': get_secret('DB_PORT'),
     }
 }
 
