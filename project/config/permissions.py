@@ -1,7 +1,8 @@
-from rest_framework import permissions
+from rest_framework.permissions import BasePermission
+from core.ERROR.error_cases import GlobalErrorMessage401
 
 
-class MyIsAuthenticated(permissions.BasePermission):
+class MyIsAuthenticated(BasePermission):
     message = ''
 
     def has_permission(self, request, view):
@@ -17,4 +18,11 @@ class MyIsAuthenticated(permissions.BasePermission):
             self.message = '로그인이 필요합니다.'
             return False
 
+        return True
+
+
+class IsOwnedByProfile(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if not (obj.profile.pk == request.user.pk):
+            raise GlobalErrorMessage401(str("다른 사람의 일기는 볼 수 없어요."))
         return True

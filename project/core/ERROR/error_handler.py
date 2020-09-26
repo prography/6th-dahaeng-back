@@ -37,3 +37,9 @@ def custom_exception_handler(exc, context):
             'response': 'error',
             'message': str(exc)
         }, status=status.HTTP_400_BAD_REQUEST)
+
+    if isinstance(exc, GlobalErrorMessage401):
+        return Response({
+            'response': 'error',
+            'message': str(exc)
+        }, status=status.HTTP_401_UNAUTHORIZED)

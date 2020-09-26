@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 
 from django.http import Http404
+from django.shortcuts import get_object_or_404
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -8,7 +9,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 
-from config.permissions import MyIsAuthenticated
+from config.permissions import MyIsAuthenticated, IsOwnedByProfile
 from core.models import UserCoin, Attendance, Profile
 from core.ERROR.error_cases import GlobalErrorMessage, GlobalErrorMessage400
 from record.API.utils import pick_question_pk_number, calculate_continuity_and_reward, update_user_coin_with_reward, \
@@ -74,7 +75,8 @@ class PostView(APIView):
         search_values = request.GET.getlist('search', [])
         # URL 에서 잘못 된 경우
         if len(search_fields) != len(search_values):
-            raise GlobalErrorMessage400("search_fields 와 search 가 mapping 이 되지 않습니다. 확인해주세요")
+            raise GlobalErrorMessage400(
+                "search_fields 와 search 가 mapping 이 되지 않습니다. 확인해주세요")
 
         filter_dictionary = {"profile": self.request.user.pk}
         # TODO : enumerator 라고 바꾸는 게 좀더 pythonic 하다.
@@ -101,7 +103,8 @@ class PostView(APIView):
         data._mutable = True
         data['profile'] = email
         data['question'] = get_question_of_user_question(profile_pk=profile.pk)
-        request.data["image"].name = fix_image_name(image_name=request.data["image"].name)
+        request.data["image"].name = fix_image_name(
+            image_name=request.data["image"].name)
 
         # 연속 기록 체크
         today = date.today()
@@ -126,7 +129,8 @@ class PostView(APIView):
             date=today,
             emotion=data['emotion'])
 
-        coin: int = update_user_coin_with_reward(user_coin=user_coin, reward=reward, today=today)
+        coin: int = update_user_coin_with_reward(
+            user_coin=user_coin, reward=reward, today=today)
 
         return Response({
             "response": "success",
@@ -145,13 +149,16 @@ class PostDetail(APIView):
     """
     Retrieve a happy-record instance for a specific date
     """
-    permission_classes = [MyIsAuthenticated, ]
+    permission_classes = (MyIsAuthenticated, IsOwnedByProfile, )
 
-    def get_post_object(self, pk):
-        try:
-            return Post.objects.get(pk=pk)
-        except:
-            raise Http404
+    def get_object(self, pk):
+        """
+            Object level permission:
+            get_object() --> check_object_permissions --> permission_classes --> config.permissions.IsOwnedByProfile
+        """
+        obj = get_object_or_404(Post.objects.all(), pk=self.kwargs["pk"])
+        self.check_object_permissions(self.request, obj)
+        return obj
 
     def get(self, request, pk, format=None):
         """
@@ -163,12 +170,14 @@ class PostDetail(APIView):
         email = request.user.email
         profile = Profile.objects.get(email=email)
 
-        post = self.get_post_object(pk)
+        post = self.get_object(pk)
         post_serializer = PostSerializer(post)
 
-        if post.profile == profile or profile.role == 10:
-            return Response(post_serializer.data)
-        raise GlobalErrorMessage("다른 사람의 일기는 볼 수 없어요.")
+        return Response(post_serializer.data)
+
+        # if post.profile == profile or profile.role == 10:
+        #     return Response(post_serializer.data)
+        # raise GlobalErrorMessage("다른 사람의 일기는 볼 수 없어요.")
 
     def patch(self, request, pk, format=None):
         """
@@ -176,12 +185,13 @@ class PostDetail(APIView):
             input 으로 넣어준다.
             그리고, 그것을 PostSerializer 에서 update 를 통해서 갱신을 한다.
         """
-        post = self.get_post_object(pk)
+        post = self.get_object(pk)
 
         email = request.user.email
         profile = Profile.objects.get(email=email)
         # 이름의 확장자가 jpg" 으로 되는 경우가 있어서, 수정을 하였다.
-        request.data["image"].name = fix_image_name(image_name=request.data["image"].name)
+        request.data["image"].name = fix_image_name(
+            image_name=request.data["image"].name)
 
         post_serializer = PostSerializer(post, data=request.data, partial=True)
         if post_serializer.is_valid():
@@ -192,7 +202,7 @@ class PostDetail(APIView):
         raise GlobalErrorMessage400(str(post_serializer.errors))
 
     def delete(self, request, pk, format=None):
-        post = self.get_post_object(pk)
+        post = self.get_object(pk)
         email = request.user.email
         profile = Profile.objects.get(email=email)
         user_coin = UserCoin.objects.get(profile=profile.id)
