@@ -101,6 +101,7 @@ class PostView(APIView):
         data._mutable = True
         data['profile'] = email
         data['question'] = get_question_of_user_question(profile_pk=profile.pk)
+        request.data["image"].name = fix_image_name(image_name=request.data["image"].name)
 
         # 연속 기록 체크
         today = date.today()
