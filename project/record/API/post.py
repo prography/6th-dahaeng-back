@@ -175,10 +175,6 @@ class PostDetail(APIView):
 
         return Response(post_serializer.data)
 
-        # if post.profile == profile or profile.role == 10:
-        #     return Response(post_serializer.data)
-        # raise GlobalErrorMessage("다른 사람의 일기는 볼 수 없어요.")
-
     def patch(self, request, pk, format=None):
         """
             form-data 에 detail, emotion, image 를
