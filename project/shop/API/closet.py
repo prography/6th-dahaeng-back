@@ -15,8 +15,7 @@ class MyClosetView(APIView):
         """
             user 가 구입을 했던 item 들을 list 에 넣어 돌려준다.
         """
-        email = request.user.email
-        profile = Profile.objects.get(email=email)
+        profile = Profile.objects.get(email=request.user.email)
 
         user_items = UserItem.objects.all().filter(profile=profile.pk)
         serializer = UserItemSerializer(user_items, many=True)
