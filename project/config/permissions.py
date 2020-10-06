@@ -23,6 +23,6 @@ class MyIsAuthenticated(BasePermission):
 
 class IsOwnedByProfile(BasePermission):
     def has_object_permission(self, request, view, obj):
-        if not (obj.profile.pk == request.user.pk):
-            raise GlobalErrorMessage401(str("다른 사람의 일기는 볼 수 없어요."))
+        if not (obj.profile.pk == request.user.pk) and request.user.role == '0':
+            raise GlobalErrorMessage401(str("다른 사람 것은 볼 수 없어요."))
         return True
