@@ -1,13 +1,15 @@
-{% autoescape off %}
-
-<!-- TODO: 프론트 링크 동적으로 생성해서 연결해주기. -->
-<!-- ex) 프론트 도메인/profile_id/token/ -->
-
+<html>
 안녕하세요 다행입니다.
+<br>
+아래 버튼을 눌러서, 인증을 해주세요.
 
-링크 : 프론트에서 만든 이메일 인증 페이지로 가는 링크
+<h5>링크 : 프론트에서 만든 이메일 인증 페이지로 가는 링크</h5>
 
-{{profile_id}}
-{{token}}
+<iframe width="0" height="0" border="0" name="dummyframe" id="dummyframe"></iframe>
 
-{% endautoescape %}
+<form action="https://api.dahaengback.shop/user_active/" accept-charset="utf-8" name="person_info" method="POST" target="dummyframe">
+    <input style="display:none;" type="text" name="profile_id64" placeholder=`{{profile_id}}` value="aaaaaaa"  />
+    <input style="display:none;" type="text" name="token" placeholder=`{{token}}` value="bbbb" />
+    <button type='submit' > 인증하기 </button>
+</form>
+</html>
