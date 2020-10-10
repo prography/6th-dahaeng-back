@@ -150,7 +150,7 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
         if profile.last_login is None:
             UserQuestion.objects.create(profile=profile)
             UserCoin.objects.create(profile=profile)
-        if str(profile.last_login).split()[0] < date.today():
+        if str(profile.last_login).split()[0] < str(date.today()):
             downgrade_jorang_status(profile)
 
         # 조랭이 check
