@@ -41,7 +41,9 @@ def everyday_user_question_generation(request):
         if question_pk == 0:
             raise GlobalErrorMessage400("행복 질문이 존재하지 않습니다. 행복 질문 등록 후 이용하세요")
         try:
-            user_question.update(question = question_pk)
+            new_question = Question.objects.get(pk=question_pk)
+            user_question.question = new_question
+            user_question.save()
         except (Question.DoesNotExist, AssertionError):
             raise GlobalErrorMessage400("행복 질문이 존재하지 않습니다. 행복 질문 등록 후 이용하세요")
 
