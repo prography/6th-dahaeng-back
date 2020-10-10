@@ -1,3 +1,5 @@
+from datetime import date, timedelta
+
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 
@@ -5,6 +7,7 @@ from config.permissions import MyIsAuthenticated
 from config.utils import random_color
 from core.models import Jorang
 from core.ERROR.error_cases import GlobalErrorMessage
+from record.models import Post
 from shop.models import Item
 from shop.serializers import UserItemSerializer
 
@@ -47,7 +50,8 @@ def create(request):
         profile=profile
     )
 
-    item_exist, item_id = is_item_exist(item_type="jorang_color", item_detail=color)
+    item_exist, item_id = is_item_exist(
+        item_type="jorang_color", item_detail=color)
     if not item_exist:
         user_jorang.delete()
         raise GlobalErrorMessage('존재하지 않는 조랭이 색입니다. 상점에 색 아이템을 추가하세요!')
@@ -85,3 +89,32 @@ def is_item_exist(item_type, item_detail):
         return True, item_id
     except Item.DoesNotExist:
         return False, None
+
+
+def upgrade_jorang_status(profile):
+    try:
+        jorang = Jorang.objects.get(profile=profile)
+        if jorang.status == 0:
+            jorang.status = 1
+        elif jorang.status == 1:
+            jorang.status = 2
+        jorang.save()
+        return jorang.status
+    except Jorang.DoesNotExist:
+        raise GlobalErrorMessage("유저에게 조랭이가 없습니다!!")
+
+
+def downgrade_jorang_status(profile):
+    try:
+        last_post_date = profile.post.last().created_at
+        timedelta_last_post_and_today = date.today() - last_post_date
+
+        downgrade_step = 0
+        if timedelta_last_post_and_today > timedelta(days=5):
+            jorang = Jorang.objects.get(profile=profile)
+            if int(jorang.status) > 0:
+                jorang.status = str(int(jorang.status) - 1)
+                jorang.save()
+
+    except Post.DoesNotExist:
+        raise GlobalErrorMessage("유저에게 작성된 일기가 없습니다!!")

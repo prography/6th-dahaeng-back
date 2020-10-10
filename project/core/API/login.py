@@ -25,6 +25,7 @@ from config.permissions import MyIsAuthenticated
 from core.models import Jorang, Profile, UserCoin
 from core.serializers import ProfileSerializer
 from core.API.email import send_email_for_active
+from core.API.jorang import downgrade_jorang_status
 from core.API.tokens import account_activation_token
 from core.ERROR.error_cases import GlobalErrorMessage
 from record.serializers import UserQuestionSerializer
@@ -149,6 +150,8 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
         if profile.last_login is None:
             UserQuestion.objects.create(profile=profile)
             UserCoin.objects.create(profile=profile)
+        if str(profile.last_login).split()[0] < date.today():
+            downgrade_jorang_status(profile)
 
         # 조랭이 check
         try:
