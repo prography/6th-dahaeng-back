@@ -149,11 +149,6 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
         if profile.last_login is None:
             UserQuestion.objects.create(profile=profile)
             UserCoin.objects.create(profile=profile)
-        # 아닐 경우
-        else:
-            user_question = UserQuestion.objects.get(profile=profile)
-            user_question.last_login = date.today()
-            user_question.save()
 
         # 조랭이 check
         try:

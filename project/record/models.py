@@ -41,7 +41,7 @@ class Post(models.Model):
     question = models.ForeignKey(
         Question, on_delete=models.SET_NULL, null=True)
     detail = models.TextField(blank=True)
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='post')
     image = models.ImageField(
         null=True, upload_to=date_upload_to)
     continuity = models.IntegerField(default=0)
@@ -59,7 +59,7 @@ class UserQuestion(models.Model):
         매일 유저에게 새로운 질문을 매칭을 해주기 위해서, 구현이 되었다.
     """
     profile = models.OneToOneField(Profile, on_delete=models.CASCADE)
-    last_login = models.DateField(null=True)
+    last_login = models.DateField(null=True, auto_now=True, auto_now_add=True)
     question = models.ForeignKey(
         Question, on_delete=models.SET_NULL, null=True)
 

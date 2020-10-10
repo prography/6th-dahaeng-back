@@ -12,6 +12,7 @@ from rest_framework.decorators import api_view, permission_classes
 from config.permissions import MyIsAuthenticated, IsOwnedByProfile
 from core.models import UserCoin, Attendance, Profile
 from core.ERROR.error_cases import GlobalErrorMessage, GlobalErrorMessage400
+from core.API.jorang import upgrade_jorang_status
 from record.API.utils import pick_question_pk_number, calculate_continuity_and_reward, update_user_coin_with_reward, \
     get_question_of_user_question, fix_image_name
 from record.models import Post, Question, UserQuestion
@@ -35,19 +36,12 @@ def everyday_user_question_generation(request):
     user_question = UserQuestion.objects.get(profile=profile.pk)
 
     # 새로 생성을 하거나 or 오늘 처음 question 생성하는 경우.
-    if user_question.question is None or user_question.last_login != date.today():
+    if user_question.last_login != date.today():
         question_pk = pick_question_pk_number()
         if question_pk == 0:
             raise GlobalErrorMessage400("행복 질문이 존재하지 않습니다. 행복 질문 등록 후 이용하세요")
         try:
-            serializer = UserQuestionSerializer(user_question,
-                                                data={
-                                                    "profile": email,
-                                                    "last_login": date.today(),
-                                                    "question": question_pk})
-            if serializer.is_valid(raise_exception=True):
-                serializer.save()
-
+            user_question.update(question = question_pk)
         except (Question.DoesNotExist, AssertionError):
             raise GlobalErrorMessage400("행복 질문이 존재하지 않습니다. 행복 질문 등록 후 이용하세요")
 
@@ -131,6 +125,9 @@ class PostView(APIView):
 
         coin: int = update_user_coin_with_reward(
             user_coin=user_coin, reward=reward, today=today)
+
+        if continuity > 0 and continuity % 10 == 0:
+            upgrade_jorang_status(profile)
 
         return Response({
             "response": "success",
