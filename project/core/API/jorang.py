@@ -109,7 +109,6 @@ def downgrade_jorang_status(profile):
         last_post_date = profile.post.last().created_at
         timedelta_last_post_and_today = date.today() - last_post_date
 
-        downgrade_step = 0
         if timedelta_last_post_and_today > timedelta(days=5):
             try:
                 jorang = Jorang.objects.get(profile=profile)
