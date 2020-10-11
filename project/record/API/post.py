@@ -2,6 +2,7 @@ from datetime import date, timedelta
 
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from django.utils.datastructures import MultiValueDictKeyError
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -99,8 +100,11 @@ class PostView(APIView):
         data._mutable = True
         data['profile'] = email
         data['question'] = get_question_of_user_question(profile_pk=profile.pk)
-        request.data["image"].name = fix_image_name(
-            image_name=request.data["image"].name)
+        try:
+            request.data["image"].name = fix_image_name(
+                image_name=request.data["image"].name)
+        except MultiValueDictKeyError:
+            pass
 
         # 연속 기록 체크
         today = date.today()
@@ -185,8 +189,11 @@ class PostDetail(APIView):
         email = request.user.email
         profile = Profile.objects.get(email=email)
         # 이름의 확장자가 jpg" 으로 되는 경우가 있어서, 수정을 하였다.
-        request.data["image"].name = fix_image_name(
-            image_name=request.data["image"].name)
+        try:
+            request.data["image"].name = fix_image_name(
+                image_name=request.data["image"].name)
+        except MultiValueDictKeyError:
+            pass
 
         post_serializer = PostSerializer(post, data=request.data, partial=True)
         if post_serializer.is_valid():
