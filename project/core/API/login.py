@@ -22,9 +22,10 @@ from rest_framework_jwt.views import ObtainJSONWebToken
 
 # custom
 from config.permissions import MyIsAuthenticated
-from core.models import Jorang, Profile
-from core.serializers import ProfileSerializer, UserCoinSerializer
+from core.models import Jorang, Profile, UserCoin
+from core.serializers import ProfileSerializer
 from core.API.email import send_email_for_active
+from core.API.jorang import downgrade_jorang_status
 from core.API.tokens import account_activation_token
 from core.ERROR.error_cases import GlobalErrorMessage
 from record.serializers import UserQuestionSerializer
@@ -135,7 +136,8 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
         try:
             profile = Profile.objects.get(email=email)
             if not profile.is_active:
-                raise GlobalErrorMessage('활성화 되지 않은 계정입니다. 메일을 확인하고, 본인인증을 해주세요.')
+                raise GlobalErrorMessage(
+                    '활성화 되지 않은 계정입니다. 메일을 확인하고, 본인인증을 해주세요.')
         except Profile.DoesNotExist:
             raise GlobalErrorMessage('유효하지않은 계정입니다.')
 
@@ -146,21 +148,11 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
 
         # 처음 로그인일 경우
         if profile.last_login is None:
-            user_question_serializer = UserQuestionSerializer(
-                data={"profile": email}, partial=True)
-            if user_question_serializer.is_valid():
-                user_question_serializer.save()
+            UserQuestion.objects.create(profile=profile)
+            UserCoin.objects.create(profile=profile)
+        if str(profile.last_login).split()[0] < str(date.today()):
+            downgrade_jorang_status(profile)
 
-            user_coin_serializer = UserCoinSerializer(data={"profile": email})
-            if user_coin_serializer.is_valid():
-                user_coin_serializer.save()
-        # 아닐 경우
-        else:
-            user_question = UserQuestion.objects.get(profile=profile.id)
-            user_question_serializer = UserQuestionSerializer(
-                user_question, data={"last_login": date.today()}, partial=True)
-            if user_question_serializer.is_valid():
-                user_question_serializer.save()
         # 조랭이 check
         try:
             jorang = Jorang.objects.get(profile=profile)
