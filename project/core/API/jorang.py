@@ -105,18 +105,17 @@ def upgrade_jorang_status(profile):
 
 
 def downgrade_jorang_status(profile):
-    try:
-        last_post_date = profile.post.last().created_at
-        timedelta_last_post_and_today = date.today() - last_post_date
-
-        if timedelta_last_post_and_today > timedelta(days=5):
-            try:
-                jorang = Jorang.objects.get(profile=profile)
-                if int(jorang.status) > 0:
-                    jorang.status = str(int(jorang.status) - 1)
-                    jorang.save()
-            except Jorang.DoesNotExist:
-                raise GlobalErrorMessage("유저에게 조랭이가 없습니다!!")
-
-    except Post.DoesNotExist:
+    if profile.post.last() is None:
         raise GlobalErrorMessage("유저에게 작성된 일기가 없습니다!!")
+
+    last_post_date = profile.post.last().created_at
+    timedelta_last_post_and_today = date.today() - last_post_date
+
+    if timedelta_last_post_and_today > timedelta(days=5):
+        try:
+            jorang = Jorang.objects.get(profile=profile)
+            if int(jorang.status) > 0:
+                jorang.status = str(int(jorang.status) - 1)
+                jorang.save()
+        except Jorang.DoesNotExist:
+            raise GlobalErrorMessage("유저에게 조랭이가 없습니다!!")
