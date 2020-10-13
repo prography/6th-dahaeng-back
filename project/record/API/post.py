@@ -2,6 +2,7 @@ from datetime import date, timedelta
 
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from django.utils.datastructures import MultiValueDictKeyError
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -12,6 +13,7 @@ from rest_framework.decorators import api_view, permission_classes
 from config.permissions import MyIsAuthenticated, IsOwnedByProfile
 from core.models import UserCoin, Attendance, Profile
 from core.ERROR.error_cases import GlobalErrorMessage, GlobalErrorMessage400
+from core.API.jorang import upgrade_jorang_status
 from record.API.utils import pick_question_pk_number, calculate_continuity_and_reward, update_user_coin_with_reward, \
     get_question_of_user_question, fix_image_name
 from record.models import Post, Question, UserQuestion
@@ -35,19 +37,14 @@ def everyday_user_question_generation(request):
     user_question = UserQuestion.objects.get(profile=profile.pk)
 
     # 새로 생성을 하거나 or 오늘 처음 question 생성하는 경우.
-    if user_question.question is None or user_question.last_login != date.today():
+    if user_question.last_login != date.today():
         question_pk = pick_question_pk_number()
         if question_pk == 0:
             raise GlobalErrorMessage400("행복 질문이 존재하지 않습니다. 행복 질문 등록 후 이용하세요")
         try:
-            serializer = UserQuestionSerializer(user_question,
-                                                data={
-                                                    "profile": email,
-                                                    "last_login": date.today(),
-                                                    "question": question_pk})
-            if serializer.is_valid(raise_exception=True):
-                serializer.save()
-
+            new_question = Question.objects.get(pk=question_pk)
+            user_question.question = new_question
+            user_question.save()
         except (Question.DoesNotExist, AssertionError):
             raise GlobalErrorMessage400("행복 질문이 존재하지 않습니다. 행복 질문 등록 후 이용하세요")
 
@@ -103,8 +100,11 @@ class PostView(APIView):
         data._mutable = True
         data['profile'] = email
         data['question'] = get_question_of_user_question(profile_pk=profile.pk)
-        request.data["image"].name = fix_image_name(
-            image_name=request.data["image"].name)
+        try:
+            request.data["image"].name = fix_image_name(
+                image_name=request.data["image"].name)
+        except MultiValueDictKeyError:
+            pass
 
         # 연속 기록 체크
         today = date.today()
@@ -131,6 +131,9 @@ class PostView(APIView):
 
         coin: int = update_user_coin_with_reward(
             user_coin=user_coin, reward=reward, today=today)
+
+        if continuity > 0 and continuity % 10 == 0:
+            upgrade_jorang_status(profile)
 
         return Response({
             "response": "success",
@@ -186,8 +189,11 @@ class PostDetail(APIView):
         email = request.user.email
         profile = Profile.objects.get(email=email)
         # 이름의 확장자가 jpg" 으로 되는 경우가 있어서, 수정을 하였다.
-        request.data["image"].name = fix_image_name(
-            image_name=request.data["image"].name)
+        try:
+            request.data["image"].name = fix_image_name(
+                image_name=request.data["image"].name)
+        except MultiValueDictKeyError:
+            pass
 
         post_serializer = PostSerializer(post, data=request.data, partial=True)
         if post_serializer.is_valid():

@@ -109,8 +109,7 @@ class Jorang(models.Model):
     STATUS_CHOICES = (
         ('0', '알'),
         ('1', '유년기'),
-        ('2', '성장기'),
-        ('3', '성숙기')
+        ('2', '성장기')
     )
 
     profile = models.OneToOneField(
