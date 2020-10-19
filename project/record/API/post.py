@@ -37,7 +37,8 @@ def everyday_user_question_generation(request):
     user_question = UserQuestion.objects.get(profile=profile.pk)
 
     # 새로 생성을 하거나 or 오늘 처음 question 생성하는 경우.
-    if user_question.last_login != date.today():
+    # 오늘 생성을 할경우, last_login 이 created 되어 버리기 때문에, question 이 존재 하지 않으면, 생성
+    if user_question.last_login != date.today() or user_question.question is None:
         question_pk = pick_question_pk_number()
         if question_pk == 0:
             raise GlobalErrorMessage400("행복 질문이 존재하지 않습니다. 행복 질문 등록 후 이용하세요")
@@ -152,7 +153,7 @@ class PostDetail(APIView):
     """
     Retrieve a happy-record instance for a specific date
     """
-    permission_classes = (MyIsAuthenticated, IsOwnedByProfile, )
+    permission_classes = (MyIsAuthenticated, IsOwnedByProfile,)
 
     def get_object(self, pk):
         """
