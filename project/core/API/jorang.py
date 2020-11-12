@@ -106,7 +106,8 @@ def upgrade_jorang_status(profile):
 
 def downgrade_jorang_status(profile):
     if profile.post.last() is None:
-        raise GlobalErrorMessage("유저에게 작성된 일기가 없습니다!!")
+        return 
+        # raise GlobalErrorMessage("유저에게 작성된 일기가 없습니다!!")
 
     last_post_date = profile.post.last().created_at
     timedelta_last_post_and_today = date.today() - last_post_date
