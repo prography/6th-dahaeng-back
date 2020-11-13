@@ -1,0 +1,31 @@
+server {
+        server_name 52.79.89.146, api.dahaengback.shop;
+
+        location = /favicon.ico { access_log off; log_not_found off; }
+
+        location /static/ {
+                root /home/ubuntu/DAHAENG/6th-Dahaeng-back/project;
+        }
+
+        location / {
+                include proxy_params;
+                proxy_pass http://unix:/home/ubuntu/DAHAENG/6th-Dahaeng-back/project/gunicorn.sock;
+        }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/api.dahaengback.shop/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/api.dahaengback.shop/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+server {
+    if ($host = api.dahaengback.shop) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+        listen 80;
+        server_name 52.79.89.146, api.dahaengback.shop;
+	return 404;
+}
