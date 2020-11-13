@@ -11,6 +11,7 @@ from datetime import date
 
 # Django
 from django.contrib.auth.models import update_last_login
+from django.http import HttpResponseRedirect
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
 # DRF
@@ -26,7 +27,6 @@ from core.models import Jorang, Profile, UserCoin
 from core.serializers import ProfileSerializer
 from core.API.email import send_email_for_active
 from core.API.jorang import downgrade_jorang_status
-from core.API.tokens import account_activation_token
 from core.ERROR.error_cases import GlobalErrorMessage
 from record.serializers import UserQuestionSerializer
 from record.models import UserQuestion
@@ -86,28 +86,38 @@ def user_active(request):
         올바르다면, user 를 activate 시켜준다.
     """
 
-    profile_id64 = request.data.get('profile_id64')
+
+    profile_id = request.data.get('profile_id')
     token = request.data.get('token')
 
-    if profile_id64 is None or token is None:
-        raise GlobalErrorMessage("profile_id64 or token 이 존재하지 않습니다.")
+    print("profile_id",profile_id)
+    print("token", token)
 
-    profile_id = int(force_text(urlsafe_base64_decode(profile_id64)))
+
+    # TODO: 이 방식으로 수정하기.
+
+    if profile_id is None or token is None:
+        # raise GlobalErrorMessage("profile_id64 or token 이 존재하지 않습니다.")
+        return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.firebaseapp.com/')
+
     try:
-        profile = Profile.objects.get(id=profile_id)
+        profile = Profile.objects.get(id=int(profile_id))
     except Profile.DoesNotExist:
-        raise GlobalErrorMessage(f' profile pk= {profile_id}에 해당하는 유저가 없습니다.')
+        # raise GlobalErrorMessage(f' profile pk= {profile_id}에 해당하는 유저가 없습니다.')
+        return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.firebaseapp.com/')
 
-    if account_activation_token.check_token(profile, token):
+    if profile.email_token.token == token:
         profile.status = '1'
         profile.save()
     else:
-        raise GlobalErrorMessage('유효하지 않은 token 입니다.')
+        # raise GlobalErrorMessage('유효하지 않은 token 입니다.')
+        return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.firebaseapp.com/')
+    return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.firebaseapp.com/')
 
-    return Response({
-        'response': 'success',
-        'message': f'{profile}이 활성화 되었습니다.'
-    })
+    # return Response({
+    #     'response': 'success',
+    #     'message': f'{profile}이 활성화 되었습니다.'
+    # })
 
 
 # /login/
