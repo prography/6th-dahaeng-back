@@ -6,6 +6,7 @@
     UserCoin -> 사용자의 코인 값을 저장하기 위해서 만든 모델.
     Attendance -> 사용자의 출석을 체크하기 위해서 만든 모델이다.
 """
+import uuid
 
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
@@ -21,6 +22,8 @@ class UserManager(BaseUserManager):
             email=self.normalize_email(email),
         )
         user.set_password(password)
+
+        user.email_token = EmailToken.objects.create(token=str(uuid.uuid4()))
 
         user.status = '0'
         user.role = '0'
@@ -73,6 +76,8 @@ class Profile(AbstractBaseUser, PermissionsMixin):
     )
 
     email = models.EmailField(max_length=50, unique=True)
+    email_token = models.OneToOneField('EmailToken', null=True, on_delete=models.CASCADE)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     # 모든 유저는 가입대기 부터 시작한다.
@@ -97,6 +102,10 @@ class Profile(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+
+class EmailToken(models.Model):
+    token = models.CharField(default="", max_length=37)
 
 
 class Jorang(models.Model):

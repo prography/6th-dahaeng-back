@@ -6,7 +6,7 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.template.loader import get_template
 
-from core.API.tokens import account_activation_token
+
 
 
 def send_email_for_active(profile, request):
@@ -20,8 +20,8 @@ def send_email_for_active(profile, request):
 
     # TODO: Celery 로 바꾸어서 구현을 하자. - by 경준.
     authentication_information = {
-        'profile_id': urlsafe_base64_encode(force_bytes(profile.id)),
-        'token': account_activation_token.make_token(profile),
+        'profile_id': profile.id,
+        'token': profile.email_token.token,
     }
     message = get_template('core/email_for_active.html').render(authentication_information)
 
