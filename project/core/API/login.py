@@ -86,15 +86,8 @@ def user_active(request):
         올바르다면, user 를 activate 시켜준다.
     """
 
-
     profile_id = request.data.get('profile_id')
     token = request.data.get('token')
-
-    print("profile_id",profile_id)
-    print("token", token)
-
-
-    # TODO: 이 방식으로 수정하기.
 
     if profile_id is None or token is None:
         # raise GlobalErrorMessage("profile_id64 or token 이 존재하지 않습니다.")
