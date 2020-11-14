@@ -86,7 +86,7 @@ def user_active(request):
         올바르다면, user 를 activate 시켜준다.
     """
 
-    profile_id = request.data.get('profile_id')
+    profile_id = request.data.get('profile_id')[:-1]
     token = request.data.get('token')
 
     if profile_id is None or token is None:
