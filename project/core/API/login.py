@@ -72,45 +72,71 @@ class CreateProfileView(APIView):
 
 
 # /user_active/
-@api_view(['POST'])
-@permission_classes([AllowAny, ])
-def user_active(request):
-    """
-        Email 로 보낸 것에 대해서,
-        {
-            'profile_id64': profile_id64,
-            'token': token
-        }
-        을 받아, profile_id64 -> Profile 객체를 이끌어 오고,
-        token 을 다시 profile 객체로 만들어 비교를 한다.
-        올바르다면, user 를 activate 시켜준다.
-    """
+class UserActivateView(APIView):
+    permission_classes = [AllowAny]
 
-    profile_id = request.data.get('profile_id')[:-1]
-    token = request.data.get('token')
+    def get(self, request):
+        print("request.query_params", request.query_params)
+        profile_id = request.query_params["profile_id"]
+        token = request.query_params["token"]
+        print("profile_id", profile_id, "token", token)
+        if profile_id is None or token is None:
+            # raise GlobalErrorMessage("profile_id64 or token 이 존재하지 않습니다.")
+            return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.firebaseapp.com/')
+        if profile_id[-1] == "/":
+            profile_id = profile_id[:-1]
+        if token[-1] == "/":
+            token = token[:-1]
 
-    if profile_id is None or token is None:
-        # raise GlobalErrorMessage("profile_id64 or token 이 존재하지 않습니다.")
+        print("profile_id", profile_id, "token", token)
+
+        try:
+            profile = Profile.objects.get(id=int(profile_id))
+        except Profile.DoesNotExist:
+            # raise GlobalErrorMessage(f' profile pk= {profile_id}에 해당하는 유저가 없습니다.')
+            return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.firebaseapp.com/')
+
+        if profile.email_token.token == token:
+            profile.status = '1'
+            profile.save()
+        else:
+            # raise GlobalErrorMessage('유효하지 않은 token 입니다.')
+            return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.firebaseapp.com/')
         return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.firebaseapp.com/')
 
-    try:
-        profile = Profile.objects.get(id=int(profile_id))
-    except Profile.DoesNotExist:
-        # raise GlobalErrorMessage(f' profile pk= {profile_id}에 해당하는 유저가 없습니다.')
-        return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.firebaseapp.com/')
+    def post(self, request):
+        """
+                Email 로 보낸 것에 대해서,
+                {
+                    'profile_id64': profile_id64,
+                    'token': token
+                }
+                을 받아, profile_id64 -> Profile 객체를 이끌어 오고,
+                token 을 다시 profile 객체로 만들어 비교를 한다.
+                올바르다면, user 를 activate 시켜준다.
+            """
 
-    if profile.email_token.token == token:
-        profile.status = '1'
-        profile.save()
-    else:
-        # raise GlobalErrorMessage('유효하지 않은 token 입니다.')
-        return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.firebaseapp.com/')
-    return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.firebaseapp.com/')
+        profile_id = request.data.get('profile_id')
+        token = request.data.get('token')
+        # print("profile_id", profile_id, "token", token)
 
-    # return Response({
-    #     'response': 'success',
-    #     'message': f'{profile}이 활성화 되었습니다.'
-    # })
+        if profile_id is None or token is None:
+            # raise GlobalErrorMessage("profile_id64 or token 이 존재하지 않습니다.")
+            return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.firebaseapp.com/')
+
+        try:
+            profile = Profile.objects.get(id=int(profile_id))
+        except Profile.DoesNotExist:
+            # raise GlobalErrorMessage(f' profile pk= {profile_id}에 해당하는 유저가 없습니다.')
+            return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.firebaseapp.com/')
+
+        if profile.email_token.token == token:
+            profile.status = '1'
+            profile.save()
+        else:
+            # raise GlobalErrorMessage('유효하지 않은 token 입니다.')
+            return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.firebaseapp.com/')
+        return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.firebaseapp.com/')
 
 
 # /login/
