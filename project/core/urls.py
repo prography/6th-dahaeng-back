@@ -41,7 +41,7 @@ urlpatterns = [
     # login 및 JWT Token
     path('', login.login_test, name='login_test'),
     path('signup/', login.CreateProfileView.as_view(), name='signup'),
-    path('user_active/', login.user_active, name='user_active'),
+    path('user_active/', login.UserActivateView.as_view(), name='user_active'),
     path('login/', login.MyObtainJSONWebToken.as_view(), name='login'),
     path('refresh/', refresh_jwt_token, name='refresh'),
 
