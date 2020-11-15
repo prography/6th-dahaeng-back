@@ -82,7 +82,7 @@ class UserActivateView(APIView):
         print("profile_id", profile_id, "token", token)
         if profile_id is None or token is None:
             # raise GlobalErrorMessage("profile_id64 or token 이 존재하지 않습니다.")
-            return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.firebaseapp.com/')
+            return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.web.app')
         if profile_id[-1] == "/":
             profile_id = profile_id[:-1]
         if token[-1] == "/":
@@ -94,15 +94,15 @@ class UserActivateView(APIView):
             profile = Profile.objects.get(id=int(profile_id))
         except Profile.DoesNotExist:
             # raise GlobalErrorMessage(f' profile pk= {profile_id}에 해당하는 유저가 없습니다.')
-            return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.firebaseapp.com/')
+            return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.web.app')
 
         if profile.email_token.token == token:
             profile.status = '1'
             profile.save()
         else:
             # raise GlobalErrorMessage('유효하지 않은 token 입니다.')
-            return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.firebaseapp.com/')
-        return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.firebaseapp.com/')
+            return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.web.app')
+        return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.web.app')
 
     def post(self, request):
         """
@@ -122,21 +122,21 @@ class UserActivateView(APIView):
 
         if profile_id is None or token is None:
             # raise GlobalErrorMessage("profile_id64 or token 이 존재하지 않습니다.")
-            return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.firebaseapp.com/')
+            return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.web.app')
 
         try:
             profile = Profile.objects.get(id=int(profile_id))
         except Profile.DoesNotExist:
             # raise GlobalErrorMessage(f' profile pk= {profile_id}에 해당하는 유저가 없습니다.')
-            return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.firebaseapp.com/')
+            return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.web.app')
 
         if profile.email_token.token == token:
             profile.status = '1'
             profile.save()
         else:
             # raise GlobalErrorMessage('유효하지 않은 token 입니다.')
-            return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.firebaseapp.com/')
-        return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.firebaseapp.com/')
+            return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.web.app')
+        return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.web.app')
 
 
 # /login/
