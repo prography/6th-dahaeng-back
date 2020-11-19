@@ -195,11 +195,3 @@ EMAIL_HOST_USER = get_secret('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = get_secret('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = get_secret('EMAIL_PORT')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-
-# Reminder Crontab
-
-CRONJOBS = [
-    ('0 0 * * *', 'reminder.cron.create_reminder',
-    '>>' + os.path.join(BASE_DIR, 'cron.log')),
-]
-CRONTAB_COMMAND_SUFFIX = '2>&1'
