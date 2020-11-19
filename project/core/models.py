@@ -163,5 +163,18 @@ class Attendance(models.Model):
         ordering = ['date']
 
 
+class PushNotificationMessage(models.Model):
+    MESSAGE_CHOICES = (
+        ('h', "happy word"),
+        ('r', "reminder word")
+    )
+
+    content = models.CharField(max_length=200, null=False)
+    type = models.CharField(max_length=2, choices=MESSAGE_CHOICES, default='h')
+
+    def __str__(self):
+        return "[{}]{}".format(type, content)
+
+
 class UserFeedback(models.Model):
     feedback = models.TextField()
