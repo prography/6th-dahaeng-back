@@ -162,15 +162,19 @@ class Attendance(models.Model):
         unique_together = ('profile', 'date')
         ordering = ['date']
 
-class HappyWord(models.Model):
+
+class PushNotificationMessage(models.Model):
+    MESSAGE_CHOICES = (
+        ('h', "happy word"),
+        ('r', "reminder word")
+    )
+
     content = models.CharField(max_length=200, null=False)
+    type = models.CharField(max_length=2, choices=MESSAGE_CHOICES, default='h')
 
     def __str__(self):
-        return self.content
-    
+        return "[{}]{}".format(type, content)
 
-class ReminderWord(models.Model):
-    content = models.CharField(max_length=200, null=False)
 
-    def __str__(self):
-        return self.content
+class UserFeedback(models.Model):
+    feedback = models.TextField()
