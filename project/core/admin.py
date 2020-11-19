@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Profile, Jorang, UserCoin, Attendance
+from .models import Profile, Jorang, UserCoin, Attendance, HappyWord, ReminderWord
 
 
 @admin.register(Profile)
@@ -19,4 +19,12 @@ class UserCoinAdmin(admin.ModelAdmin):
 
 @admin.register(Attendance)
 class AttendanceAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(HappyWord)
+class HappyWordsAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(ReminderWord)
+class ReminderWordsAdmin(admin.ModelAdmin):
     pass
