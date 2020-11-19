@@ -161,3 +161,7 @@ class Attendance(models.Model):
     class Meta:
         unique_together = ('profile', 'date')
         ordering = ['date']
+
+
+class UserFeedback(models.Model):
+    feedback = models.TextField()
