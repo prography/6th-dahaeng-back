@@ -61,7 +61,6 @@ INSTALLED_APPS = [
     # 내부 Application
     'core',
     'record',
-    'reminder',
     'notice',
     'shop',
 ]
