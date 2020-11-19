@@ -163,7 +163,7 @@ class Attendance(models.Model):
         ordering = ['date']
 
 class HappyWord(models.Model):
-    happy_content = models.CharField(max_length=200, null=False)
+    content = models.CharField(max_length=200, null=False)
 
     def __str__(self):
         return self.happy_content
