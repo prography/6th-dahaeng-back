@@ -35,7 +35,7 @@ from .API import login
 from .API import jorang
 from .API import profile
 from .API import attendance
-
+from .API import feedback
 
 urlpatterns = [
     # login 및 JWT Token
@@ -53,6 +53,9 @@ urlpatterns = [
 
     # 출석 체크
     path('attendance/', attendance.AttendanceView.as_view(), name='attendance'),
+
+    # UserFeedback 저장
+    path('feedback/', feedback.get_user_feedback, name='user_feedback'),
 
     # 이부분은 나중에, social login 을 정리를 하고 난뒤에 보는 것이 맞겠다.
     # path('social/', include(router.urls)),

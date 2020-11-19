@@ -162,6 +162,7 @@ class Attendance(models.Model):
         unique_together = ('profile', 'date')
         ordering = ['date']
 
+
 class HappyWord(models.Model):
     content = models.CharField(max_length=200, null=False)
 
@@ -174,3 +175,6 @@ class ReminderWord(models.Model):
 
     def __str__(self):
         return self.content
+
+class UserFeedback(models.Model):
+    feedback = models.TextField()
