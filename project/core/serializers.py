@@ -1,5 +1,5 @@
 from rest_framework import serializers as sz
-from core.models import Profile, UserCoin, Attendance
+from core.models import Profile, UserCoin, Attendance, UserFeedback
 
 
 class ProfileSerializer(sz.ModelSerializer):
@@ -44,3 +44,9 @@ class AttendanceSerializer(sz.ModelSerializer):
             'date',
             'emotion'
         ]
+
+
+class UserFeedbackSerializer(sz.ModelSerializer):
+    class Meta:
+        model = UserFeedback
+        fields = "__all__"

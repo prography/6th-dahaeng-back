@@ -1,0 +1,770 @@
+openapi: 3.0.3
+info:
+  title: ''
+  version: 0.0.0
+paths:
+  /:
+    get:
+      operationId: root_retrieve
+      description: |-
+        JWT 검증 -> config.permission.MyIsAuthenticated(요기서 Response 결정)
+        -> login_test 잘되었으면, 성공되었다고 돌려보내준다.
+
+        JWT token 을 통해서 미리 인증을 하는 과정을 거치고,
+        만약 통과를 할 경우, 바로 Response 로 보낸다.
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/schema/:
+    get:
+      operationId: api_schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - th
+          - tr
+          - tt
+          - udm
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /attendance/:
+    get:
+      operationId: attendance_retrieve
+      description: |-
+        TODO: 언제 추가가 되는지 확인을 해야겠다.
+        Profile 이 이번달에 출석을 한 일수를 계산을 하기 위해서 만든 API 입니다.
+
+        :param request:
+        :return:
+      tags:
+      - attendance
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /feedback/:
+    post:
+      operationId: feedback_create
+      description: 사용자들의 피드백을 받기위해서, 만든 `API` 입니다.
+      summary: POST UserFeed
+      tags:
+      - A - New - Core - UserFeedback
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserFeedback'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserFeedback'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserFeedback'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /jorang/:
+    post:
+      operationId: jorang_create
+      description: |-
+        우리의 마스코트 조랭이
+        조랭이의 경우, 생성될 때, 유저와 1:1 [OneToOneField] 로 mapping 이 되기 떄문에
+        유저(Profile) 당 딱 한번 밖에 생성이 되지 않는다.
+        그렇기에 유의를 할 필요가 있다.
+        {
+            "nickname": "산림수"
+        }
+
+        1. Jorang 생성
+            -> 조랭이는 profile 당 하나만 생성을 할 수 있다.
+        2. UserItem 과 Jorang 의 color 를 의미하는 Item 과 매칭.
+            -> Item 에 jorang_color 라는 item 객체들이 있고,
+            이를 UserItem 을 통해서, User 가 구입한 Item 으로 하나 만들어 주는 것이다.(스타트 보너스)
+            -> 만약 아이템이 존재 하지 않을 경우, 만들었던 조랭이는 삭제 시켜야 한다. 미리미리 상점에 Upload 하자.
+      tags:
+      - jorang
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /login/:
+    post:
+      operationId: login_create
+      description: |-
+        ObtainJSONWebToken 을 상속을 받아
+        super.post() 를 통해, token 을 할당을 받을 수 있다.
+
+        1. 계정 활성화 check
+        2. jwt_token 얻기
+        3-1. 처음 로그인 경우
+        -> 우선 회원가입을 하면서, User Question 을 만들어 주고, profile_id 만 만들어 준다.
+            추후, [매일 question user 매칭을 만드는 API 를 통해서, 이어준다.]
+        3-2. 아닐 경우
+        -> user_question 에 last_login 을 update 해두어서,
+            하루에 질문 update 를 위헤서 두세번 같은 작업을 반복하도록 하지 않는다. -> 하루에 한번만 질문을 update 해야한다.
+        4. 조랭이 check
+
+        serializer.is_valid() 를 통해서
+        data ={profile: email.com} 에 넣어둔 email 을 Profile 내부에 있는 queryset 과 비교를 해서,
+        만들었다고 볼 수 있겠다고 생각한다.
+      tags:
+      - login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JSONWebToken'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/JSONWebToken'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/JSONWebToken'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JSONWebToken'
+          description: ''
+  /notice/:
+    get:
+      operationId: notice_retrieve
+      description: ''
+      tags:
+      - notice
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /notice/reminder/:
+    get:
+      operationId: notice_reminder_retrieve
+      description: ''
+      tags:
+      - notice
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /profile/{profile_id}/:
+    get:
+      operationId: profile_retrieve
+      description: |-
+        profile_id 에 해당하는 profile 객체에 대하여,
+        profile, user_coin, user_continuity, jorang 에 관한 정보들을 넘겨준다.
+
+        TODO: orm 개선
+        TODO: permission denined 를 custom 해서 할 수 있게 해야한다.
+      parameters:
+      - in: path
+        name: profile_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - profile
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: profile_create
+      description: |-
+        조랭이의 상세 정보, nickname 과 title 을 input 으로 받아
+        그것을 저장하고, 그 값을 돌려보내준다.
+      parameters:
+      - in: path
+        name: profile_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - profile
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /record/posts/:
+    get:
+      operationId: record_posts_retrieve
+      description: |-
+        get 에서
+        http://{{ip}}:{{port}}/record/posts/?search_fields=created_at&search=2020-08-16
+        위와 같이, search_fields 와 search 를 사용을 하여,
+        Post.objects.all().filter(**filter_dictionary)
+        와 같이 필터링 가능할수 있도록 구현을 하였습니다.
+      tags:
+      - record
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+          description: ''
+    post:
+      operationId: record_posts_create
+      description: |-
+        하루에 한번만 새로운 Post 를 작성할 수 있는 기능으로,
+        emotion, detail, image 를 request 를 통해 받아서 Post model 에 넣어줍니다.
+        이를 통해, reward 와 continuity 를 계산하여, user_coin 의 값을 Update 할 수 있습니다
+      tags:
+      - record
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Post'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Post'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+          description: ''
+  /record/posts/{id}/:
+    get:
+      operationId: record_posts_retrieve_2
+      description: |-
+        pk 를 통해서, Post 객체에 접근을 한다.
+        만약 내가 작성 or 관리자일 경우에는 접근이 가능하고,
+        다른 사람의 작성물일 경우 볼 수 없다.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - record
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+    patch:
+      operationId: record_posts_partial_update
+      description: |-
+        form-data 에 detail, emotion, image 를
+        input 으로 넣어준다.
+        그리고, 그것을 PostSerializer 에서 update 를 통해서 갱신을 한다.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - record
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: record_posts_destroy
+      description: Retrieve a happy-record instance for a specific date
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - record
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /record/posts/questions/:
+    get:
+      operationId: record_posts_questions_retrieve
+      description: |-
+        매일 사람들에게 개인별로 Question 을 생성을 해주기 위해서 만든 API 입니다.
+        model Question 에 관리자가 넣어둔 question 들중 하나를 들고온다.
+        그리고 그것을 user_question 에 update 한다.
+
+        TODO: 질문이 안 바뀐다? -> 그러면 식상 할 것 같으니, 유저가 똑같은 질문을 받지 않게 짜야한다.
+        TODO: 다음 버젼 고쳐봐야겠다.
+      tags:
+      - record
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /record/questions/:
+    get:
+      operationId: record_questions_retrieve
+      description: |-
+        Question 의 목록 전체를 가져와서,
+        등록을 하는 과정을 가진다.
+      tags:
+      - record
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: record_questions_create
+      description: |-
+        새로운 Question 을 등록을 하는 과정입니다.
+        {
+            "content":"질문"
+        }
+      tags:
+      - record
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /refresh/:
+    post:
+      operationId: refresh_create
+      description: |-
+        API View that returns a refreshed token (with new expiration) based on
+        existing token
+
+        If 'orig_iat' field (original issued-at-time) is found, will first check
+        if it's within expiration window, then copy it to the new token
+      tags:
+      - refresh
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshJSONWebToken'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RefreshJSONWebToken'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RefreshJSONWebToken'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshJSONWebToken'
+          description: ''
+  /shop/item/{id}/:
+    get:
+      operationId: shop_item_retrieve
+      description: Item 에 pk를 통해서 접근을 하여 해당 Item 을 돌려준다.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - shop
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /shop/item/buy/:
+    post:
+      operationId: shop_item_buy_create
+      description: Item 에 pk를 통해서 접근을 하여 해당 Item 을 돌려준다.
+      tags:
+      - shop
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /shop/item/create/:
+    post:
+      operationId: shop_item_create_create
+      description: |-
+        Admin 이 아이템을 만들기위해서,
+        구현된 API 이며,
+        사실상 Admin 을 통해서 들어가서 수정을 할 일이 많다고 생각하고 있음.
+      tags:
+      - shop
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /shop/item/user/:
+    get:
+      operationId: shop_item_user_retrieve
+      description: |-
+        Get 을 통해서, 관리자가 만들어 둔 Item list 를 얻어 오고,
+        user 가 가지고 있는 것과 비교를 하여,
+        user 가 소유를 하고 있는 item list 와 user 가 소유하고 있지 않는 item list 를 찾아서 Return 한다.
+      tags:
+      - shop
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /shop/mycloset/:
+    get:
+      operationId: shop_mycloset_retrieve
+      description: user 가 구입을 했던 item 들을 list 에 넣어 돌려준다.
+      tags:
+      - shop
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: shop_mycloset_create
+      description: 내가 샀던 Item 을 조랭이에게 입혀보는 기능이다.
+      tags:
+      - shop
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /signup/:
+    post:
+      operationId: signup_create
+      description: |-
+        신규 사용자의 email 과 password 를 받아.
+        새로운 Profile 을 만들어준다.
+        {
+            "profile": {
+                "email": "rkdalstjd9@naver.com",
+                "password": "qwe123"
+            }
+        }
+        email 전송 성공 -> 잘 되었다고 응답.
+        email 전송 실패 -> 만든 profile 삭제.
+      tags:
+      - signup
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /user_active/:
+    get:
+      operationId: user_active_retrieve
+      description: ''
+      tags:
+      - user_active
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: user_active_create
+      description: |-
+        Email 로 보낸 것에 대해서,
+        {
+            'profile_id64': profile_id64,
+            'token': token
+        }
+        을 받아, profile_id64 -> Profile 객체를 이끌어 오고,
+        token 을 다시 profile 객체로 만들어 비교를 한다.
+        올바르다면, user 를 activate 시켜준다.
+      tags:
+      - user_active
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+components:
+  schemas:
+    EmotionEnum:
+      enum:
+      - WARM
+      - FUN
+      - HAPPY
+      - TOUCHED
+      - EXTRA
+      type: string
+    JSONWebToken:
+      type: object
+      description: |-
+        Serializer class used to validate a username and password.
+
+        'username' is identified by the custom UserModel.USERNAME_FIELD.
+
+        Returns a JSON Web Token that can be used to authenticate later calls.
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+          writeOnly: true
+      required:
+      - email
+      - password
+    Post:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date
+          readOnly: true
+        question:
+          type: string
+        detail:
+          type: string
+        profile:
+          type: string
+        emotion:
+          $ref: '#/components/schemas/EmotionEnum'
+        image:
+          type: string
+          format: uri
+          nullable: true
+        continuity:
+          type: integer
+      required:
+      - created_at
+      - emotion
+      - id
+      - profile
+      - question
+    RefreshJSONWebToken:
+      type: object
+      description: Refresh an access token.
+      properties:
+        token:
+          type: string
+      required:
+      - token
+    UserFeedback:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        feedback:
+          type: string
+      required:
+      - feedback
+      - id
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: Session
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
