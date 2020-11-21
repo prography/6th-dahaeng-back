@@ -68,7 +68,7 @@ class PostView(APIView):
             Post.objects.all().filter(**filter_dictionary)
             와 같이 필터링 가능할수 있도록 구현을 하였습니다.
 
-            detail 일 경우에는
+            detail 일 경우에는 포함을 하는 경우가 있으면, 그 POST 를 찾아서 돌려 줍니다.
         """
 
         search_fields = request.GET.getlist('search_fields', [])
