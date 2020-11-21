@@ -67,6 +67,8 @@ class PostView(APIView):
             위와 같이, search_fields 와 search 를 사용을 하여,
             Post.objects.all().filter(**filter_dictionary)
             와 같이 필터링 가능할수 있도록 구현을 하였습니다.
+
+            detail 일 경우에는 포함을 하는 경우가 있으면, 그 POST 를 찾아서 돌려 줍니다.
         """
 
         search_fields = request.GET.getlist('search_fields', [])
@@ -77,12 +79,22 @@ class PostView(APIView):
                 "search_fields 와 search 가 mapping 이 되지 않습니다. 확인해주세요")
 
         filter_dictionary = {"profile": self.request.user.pk}
-        # TODO : enumerator 라고 바꾸는 게 좀더 pythonic 하다.
-        for i in range(0, len(search_fields)):
-            filter_dictionary[search_fields[i]] = search_values[i]
-        filter_post = Post.objects.all().filter(**filter_dictionary)
-        sz = PostSerializer(filter_post, many=True)
+        detail_value = "if somebody try this, that person intend to do that"
+        if "detail" in search_fields:
+            for i in range(0, len(search_fields)):
+                if search_fields[i] == "detail":
+                    detail_value = search_values[i]
+                    continue
+                filter_dictionary[search_fields[i]] = search_values[i]
+            filter_post = Post.objects.filter(**filter_dictionary, detail__contains=detail_value)
 
+        else:
+            # TODO : enumerator 라고 바꾸는 게 좀더 pythonic 하다.
+            for i in range(0, len(search_fields)):
+                filter_dictionary[search_fields[i]] = search_values[i]
+            filter_post = Post.objects.filter(**filter_dictionary)
+
+        sz = PostSerializer(filter_post, many=True)
         return Response(sz.data)
 
     def post(self, request):
