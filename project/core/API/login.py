@@ -1,11 +1,7 @@
-"""
-Profile 의
-login, signup, JWT 등 관련된 부분들을 구현을 해두었다.
+# Swagger
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
 
-signup -> user_active -> login
-
-
-"""
 # third
 from datetime import date
 
@@ -27,6 +23,8 @@ from core.models import Jorang, Profile, UserCoin
 from core.serializers import ProfileSerializer
 from core.API.email import send_email_for_active
 from core.API.jorang import downgrade_jorang_status
+from core.API.util import get_id_of_today_post
+from core.API.request_format_serializers import LoginSerializer
 from core.ERROR.error_cases import GlobalErrorMessage
 from record.serializers import UserQuestionSerializer
 from record.models import UserQuestion
@@ -139,26 +137,19 @@ class UserActivateView(APIView):
         return HttpResponseRedirect(redirect_to='https://da-haeng-b4f92.web.app')
 
 
+@extend_schema(
+    responses=LoginSerializer,
+    auth=None,
+    tags=["A - New - Core - Login"],
+    summary="POST Login"
+)
 # /login/
 class MyObtainJSONWebToken(ObtainJSONWebToken):
     def post(self, request):
         """
-            ObtainJSONWebToken 을 상속을 받아
-            super.post() 를 통해, token 을 할당을 받을 수 있다.
-
-            1. 계정 활성화 check
-            2. jwt_token 얻기
-            3-1. 처음 로그인 경우
-            -> 우선 회원가입을 하면서, User Question 을 만들어 주고, profile_id 만 만들어 준다.
-                추후, [매일 question user 매칭을 만드는 API 를 통해서, 이어준다.]
-            3-2. 아닐 경우
-            -> user_question 에 last_login 을 update 해두어서,
-                하루에 질문 update 를 위헤서 두세번 같은 작업을 반복하도록 하지 않는다. -> 하루에 한번만 질문을 update 해야한다.
-            4. 조랭이 check
-
-            serializer.is_valid() 를 통해서
-            data ={profile: email.com} 에 넣어둔 email 을 Profile 내부에 있는 queryset 과 비교를 해서,
-            만들었다고 볼 수 있겠다고 생각한다.
+            today_post_id : 오늘 작성한 포스트 id 반환
+                * 오늘 작성한 일기가 있는 경우 : 해당 id
+                * 오늘 작성한 일기가 없는 경우 : -1
         """
         # 계정 활성화 check
         email = request.data.get('email', '')
@@ -194,6 +185,7 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
             jorang_color = None
 
         update_last_login(None, profile)
+        today_post_id = get_id_of_today_post(profile)
 
         return Response({
             'response': 'success',
@@ -204,7 +196,8 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
                 'jorang': {
                     'nickname': jorang_nickname,
                     'color': jorang_color
-                }
+                },
+                'today_post_id': today_post_id
             }
         })
 
