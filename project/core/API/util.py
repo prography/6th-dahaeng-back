@@ -1,7 +1,7 @@
 from record.models import Post
 from datetime import date
 
-def get_id_of_today_post(profile) :
+def get_id_of_today_post(profile) -> int:
     post_id = None
 
     try:
