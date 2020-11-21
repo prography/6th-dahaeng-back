@@ -173,7 +173,7 @@ class PushNotificationMessage(models.Model):
     type = models.CharField(max_length=2, choices=MESSAGE_CHOICES, default='h')
 
     def __str__(self):
-        return "[{}]{}".format(type, self.content)
+        return "[{}]{}".format(self.type, self.content)
 
 
 class UserFeedback(models.Model):
