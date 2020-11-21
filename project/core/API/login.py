@@ -27,6 +27,7 @@ from core.models import Jorang, Profile, UserCoin
 from core.serializers import ProfileSerializer
 from core.API.email import send_email_for_active
 from core.API.jorang import downgrade_jorang_status
+from core.API.util import get_id_of_today_post
 from core.ERROR.error_cases import GlobalErrorMessage
 from record.serializers import UserQuestionSerializer
 from record.models import UserQuestion
@@ -194,6 +195,7 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
             jorang_color = None
 
         update_last_login(None, profile)
+        today_post_id = get_id_of_today_post(profile)
 
         return Response({
             'response': 'success',
@@ -204,7 +206,8 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
                 'jorang': {
                     'nickname': jorang_nickname,
                     'color': jorang_color
-                }
+                },
+                'today_post_id': today_post_id
             }
         })
 
