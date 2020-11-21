@@ -64,7 +64,7 @@ INSTALLED_APPS = [
     'notice',
     'shop',
 
-    # Swgger
+    # Swagger
     'drf_spectacular',
 ]
 
@@ -160,9 +160,9 @@ REST_FRAMEWORK = {
 JWT_AUTH = {
     'JWT_ALLOW_REFRESH': True,
     # access token
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(hours=1),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=60),
     # refresh token
-    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=2),
+    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=180),
 }
 
 CORS_ORIGIN_ALLOW_ALL = True
