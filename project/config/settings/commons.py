@@ -63,6 +63,9 @@ INSTALLED_APPS = [
     'record',
     'notice',
     'shop',
+
+    # Swgger
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -150,6 +153,8 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
+    # Swagger
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 JWT_AUTH = {
