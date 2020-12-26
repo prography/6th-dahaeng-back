@@ -104,6 +104,15 @@ class Profile(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 
+class FirebaseUID(models.Model):
+    profile = models.OneToOneField(Profile, primary_key=True, on_delete=models.CASCADE)
+    uid = models.CharField(
+        unique=True,
+        max_length=100,
+        verbose_name='유저 UID (Firebase 에서 자동 생성)'
+    )
+
+
 class EmailToken(models.Model):
     token = models.CharField(default="", max_length=37)
 

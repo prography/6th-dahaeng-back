@@ -15,6 +15,8 @@ import os
 from os.path import abspath, dirname, join
 from django.core.exceptions import ImproperlyConfigured
 import datetime
+import firebase_admin
+from firebase_admin import credentials
 
 # Build paths inside the config like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -199,3 +201,10 @@ EMAIL_HOST_USER = get_secret('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = get_secret('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = get_secret('EMAIL_PORT')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+
+"""
+                Firebase Setting
+"""
+cred = credentials.Certificate(os.path.join(BASE_DIR, 'credentials.json'))
+default_app = firebase_admin.initialize_app(cred)
