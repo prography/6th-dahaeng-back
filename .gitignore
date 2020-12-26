@@ -138,3 +138,6 @@ secrets.json
 !.elasticbeanstalk/*.global.yml
 
 .DS_store
+
+# Firebase credential
+credentials.json

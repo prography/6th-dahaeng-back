@@ -234,24 +234,12 @@ paths:
     post:
       operationId: login_create
       description: |-
-        ObtainJSONWebToken 을 상속을 받아
-        super.post() 를 통해, token 을 할당을 받을 수 있다.
-
-        1. 계정 활성화 check
-        2. jwt_token 얻기
-        3-1. 처음 로그인 경우
-        -> 우선 회원가입을 하면서, User Question 을 만들어 주고, profile_id 만 만들어 준다.
-            추후, [매일 question user 매칭을 만드는 API 를 통해서, 이어준다.]
-        3-2. 아닐 경우
-        -> user_question 에 last_login 을 update 해두어서,
-            하루에 질문 update 를 위헤서 두세번 같은 작업을 반복하도록 하지 않는다. -> 하루에 한번만 질문을 update 해야한다.
-        4. 조랭이 check
-
-        serializer.is_valid() 를 통해서
-        data ={profile: email.com} 에 넣어둔 email 을 Profile 내부에 있는 queryset 과 비교를 해서,
-        만들었다고 볼 수 있겠다고 생각한다.
+        today_post_id : 오늘 작성한 포스트 id 반환
+            * 오늘 작성한 일기가 있는 경우 : 해당 id
+            * 오늘 작성한 일기가 없는 경우 : -1
+      summary: POST Login
       tags:
-      - login
+      - A - New - Core - Login
       requestBody:
         content:
           application/json:
@@ -269,7 +257,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/JSONWebToken'
+                $ref: '#/components/schemas/Login'
           description: ''
   /notice/:
     get:
@@ -350,6 +338,8 @@ paths:
         위와 같이, search_fields 와 search 를 사용을 하여,
         Post.objects.all().filter(**filter_dictionary)
         와 같이 필터링 가능할수 있도록 구현을 하였습니다.
+
+        detail 일 경우에는 포함을 하는 경우가 있으면, 그 POST 를 찾아서 돌려 줍니다.
       tags:
       - record
       security:
@@ -635,8 +625,21 @@ paths:
         }
         email 전송 성공 -> 잘 되었다고 응답.
         email 전송 실패 -> 만든 profile 삭제.
+      summary: POST UserSignup 회원가입하기
       tags:
-      - signup
+      - A - New - Core - UserSignup
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUp'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SignUp'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SignUp'
+        required: true
       security:
       - jwtAuth: []
       - cookieAuth: []
@@ -707,6 +710,36 @@ components:
       required:
       - email
       - password
+    Login:
+      type: object
+      properties:
+        token:
+          type: string
+        profile_id:
+          type: string
+        has_jorang:
+          type: boolean
+        jorang:
+          $ref: '#/components/schemas/LoginJorang'
+        today_post_id:
+          type: integer
+      required:
+      - has_jorang
+      - jorang
+      - profile_id
+      - today_post_id
+      - token
+    LoginJorang:
+      type: object
+      properties:
+        nickname:
+          type: string
+          maxLength: 50
+        color:
+          type: string
+      required:
+      - color
+      - nickname
     Post:
       type: object
       properties:
@@ -745,6 +778,18 @@ components:
           type: string
       required:
       - token
+    SignUp:
+      type: object
+      properties:
+        password:
+          type: string
+          writeOnly: true
+        uid:
+          type: string
+          writeOnly: true
+      required:
+      - password
+      - uid
     UserFeedback:
       type: object
       properties:

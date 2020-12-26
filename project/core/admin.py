@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Profile, Jorang, UserCoin, Attendance, PushNotificationMessage, UserFeedback
+from .models import Profile, Jorang, UserCoin, Attendance, PushNotificationMessage, UserFeedback, FirebaseUID
 
 
 @admin.register(Profile)
@@ -27,4 +27,8 @@ class PushNotificationMessageAdmin(admin.ModelAdmin):
 
 @admin.register(UserFeedback)
 class UserFeedbackAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(FirebaseUID)
+class FirebaseUIDAdmin(admin.ModelAdmin):
     pass

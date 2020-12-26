@@ -1,5 +1,6 @@
 from rest_framework import serializers as sz
-from core.models import Profile, UserCoin, Attendance, UserFeedback
+from core.models import Profile, UserCoin, Attendance, UserFeedback, FirebaseUID
+from core.ERROR.error_cases import GlobalErrorMessage400
 
 
 class ProfileSerializer(sz.ModelSerializer):
@@ -13,7 +14,32 @@ class ProfileSerializer(sz.ModelSerializer):
         model = Profile
         fields = [
             'password',
-            'email'
+            'email',
+        ]
+
+
+class SignUpSerializer(sz.Serializer):
+    email = sz.EmailField()
+    password = sz.CharField(write_only=True)
+    uid = sz.CharField(write_only=True)
+
+    def create(self, validated_data):
+        uid = validated_data.pop("uid", None)
+        if uid:
+            profile = Profile.objects.create_user(**validated_data)
+            FirebaseUID.objects.create(
+                profile=profile,
+                uid=uid
+            )
+            return profile
+        raise GlobalErrorMessage400("Firebase Token을 보내주세요.")
+
+    class Meta:
+        model = Profile
+        fields = [
+            'password',
+            'email',
+            'uid'
         ]
 
 

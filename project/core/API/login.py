@@ -20,7 +20,7 @@ from rest_framework_jwt.views import ObtainJSONWebToken
 # custom
 from config.permissions import MyIsAuthenticated
 from core.models import Jorang, Profile, UserCoin
-from core.serializers import ProfileSerializer
+from core.serializers import ProfileSerializer, SignUpSerializer
 from core.API.email import send_email_for_active
 from core.API.jorang import downgrade_jorang_status
 from core.API.util import get_id_of_today_post
@@ -34,6 +34,12 @@ from record.models import UserQuestion
 class CreateProfileView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        request=SignUpSerializer,
+        auth=None,
+        tags=["A - New - Core - UserSignup"],
+        summary="POST UserSignup 회원가입하기"
+    )
     def post(self, request, *args, **kwargs):
         """
             신규 사용자의 email 과 password 를 받아.
@@ -52,11 +58,11 @@ class CreateProfileView(APIView):
         if not data:
             raise GlobalErrorMessage("profile 파라미터가 없습니다.")
 
-        profile_serializer = ProfileSerializer(data=data)
-        if profile_serializer.is_valid():
-            profile = profile_serializer.save()
+        signup_serializer = SignUpSerializer(data=data)
+        if signup_serializer.is_valid():
+            profile = signup_serializer.save()
         else:
-            raise GlobalErrorMessage(str(profile_serializer.errors))
+            raise GlobalErrorMessage(str(signup_serializer.errors))
 
         email_result = send_email_for_active(profile, request)
 
