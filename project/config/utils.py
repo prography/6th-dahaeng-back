@@ -1,6 +1,6 @@
 from random import choice
 
-colors = ["FFE884", "FC9285", "8BAAD8", "F4E9DC", "BD97B4"]
+colors = ["A26C8F", "F8DB5C", "73A38F", "FF714D", "5CA1D2"]
 
 
 def random_color():
