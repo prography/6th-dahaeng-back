@@ -24,16 +24,16 @@ class MyClosetView(APIView):
             내가 샀던 Item 을 조랭이에게 입혀보는 기능이다.
         """
         profile = request.user
-        waring_item_id = request.data.get('item')
+        wearing_item_id = request.data.get('item')
 
         try:
-            item = Item.objects.get(id=waring_item_id)
+            item = Item.objects.get(id=wearing_item_id)
         except Item.DoesNotExist:
             raise GlobalErrorMessage('Item 이 DB에 존재 하지 않습니다.')
 
-        waring_item = None
+        wearing_item = None
         try:
-            waring_item = UserItem.objects.get(profile=profile, item=item)
+            wearing_item = UserItem.objects.get(profile=profile, item=item)
         except UserItem.DoesNotExist:
             raise GlobalErrorMessage("해당 아이템이 없습니다.")
 
@@ -45,7 +45,7 @@ class MyClosetView(APIView):
 
         # 같은 타입의 다른 아이템 벗기 (없으면 pass)
         try:
-            worn_item = jorang.items.get(item__item_type=waring_item.item.item_type)
+            worn_item = jorang.items.get(item__item_type=wearing_item.item.item_type)
             worn_item.is_worn = False
             worn_item.save()
             jorang.items.remove(worn_item)
@@ -53,9 +53,9 @@ class MyClosetView(APIView):
             pass
 
         # 아이템 착용
-        waring_item.is_worn = True
-        waring_item.save()
-        jorang.items.add(waring_item)
+        wearing_item.is_worn = True
+        wearing_item.save()
+        jorang.items.add(wearing_item)
 
         return Response({
             "response": "success",
