@@ -4,9 +4,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from config.permissions import MyIsAuthenticated
-from core.models import Jorang, UserCoin, Profile
+from core.models import UserCoin, Profile
 from core.ERROR.error_cases import GlobalErrorMessage
 from record.models import Post
+from shop.models import Jorang
+from shop.serializers import JorangSerializer
 
 
 # profile/<int:profile_id>/
@@ -35,6 +37,7 @@ class ProfileDetailView(APIView):
 
         try:
             jorang = Jorang.objects.get(profile=profile.id)
+            jorang_serializer = JorangSerializer(jorang)
         except Jorang.DoesNotExist:
             raise GlobalErrorMessage('해당 유저는 조랭이를 만들지 않았습니다. 조랭이를 만들어 주세요.')
 
@@ -53,7 +56,7 @@ class ProfileDetailView(APIView):
                 'email': profile.email,
                 'title': jorang.title,
                 'jorang_nickname': jorang.nickname,
-                'jorang_color': jorang.color,
+                'jorang_items': jorang_serializer.data.get('items'),
                 'jorang_status': jorang.status,
                 'user_continuity': continuity,
                 'user_coin': user_coin.coin
@@ -84,6 +87,7 @@ class ProfileDetailView(APIView):
 
         try:
             jorang = Jorang.objects.get(profile=profile.id)
+            jorang_serializer = JorangSerializer(jorang)
         except Jorang.DoesNotExist:
             raise GlobalErrorMessage('해당 유저는 조랭이를 만들지 않았습니다. 조랭이를 만들어 주세요.')
 
@@ -97,7 +101,7 @@ class ProfileDetailView(APIView):
                 'email': profile.email,
                 'title': jorang.title,
                 'jorang_nickname': jorang.nickname,
-                'jorang_color': jorang.color,
+                'jorang_items': jorang_serializer.data.get('items'),
                 'jorang_status': jorang.status,
                 'user_continuity': continuity,
                 'user_coin': user_coin.coin
