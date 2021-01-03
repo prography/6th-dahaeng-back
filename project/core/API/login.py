@@ -19,7 +19,7 @@ from rest_framework_jwt.views import ObtainJSONWebToken
 
 # custom
 from config.permissions import MyIsAuthenticated
-from core.models import Jorang, Profile, UserCoin
+from core.models import Profile, UserCoin
 from core.serializers import ProfileSerializer, SignUpSerializer
 from core.API.email import send_email_for_active
 from core.API.jorang import downgrade_jorang_status
@@ -28,6 +28,7 @@ from core.API.request_format_serializers import LoginSerializer
 from core.ERROR.error_cases import GlobalErrorMessage
 from record.serializers import UserQuestionSerializer
 from record.models import UserQuestion
+from shop.models import Jorang
 
 
 # /sighup/ 회원 가입
