@@ -117,30 +117,6 @@ class EmailToken(models.Model):
     token = models.CharField(default="", max_length=37)
 
 
-class Jorang(models.Model):
-    """
-        우리의 마스코트 조랭이
-        조랭이의 경우, 생성될 때, 유저와 1:1 [OneToOneField] 로 mapping 이 되기 떄문에
-        유저 당 딱 한번 밖에 생성이 되지 않는다.
-        그렇기에 유의를 할 필요가 있다.
-    """
-    STATUS_CHOICES = (
-        ('0', '알'),
-        ('1', '유년기'),
-        ('2', '성장기')
-    )
-
-    profile = models.OneToOneField(
-        Profile, null=True, on_delete=models.CASCADE)
-    nickname = models.CharField(max_length=50)
-    color = models.CharField(max_length=6, help_text='16진수 코드 6개 ex) FFFFFF')
-    status = models.CharField(max_length=2, choices=STATUS_CHOICES, default=0)
-    title = models.CharField(max_length=100, default="Da:haeng")
-
-    def __str__(self):
-        return "[%s] %s (%s)" % (self.profile, self.nickname, self.title)
-
-
 class UserCoin(models.Model):
     """
         코인 지급과 관련해서, Profile 의 updated_at 과 관련해서 이슈가 있어서
