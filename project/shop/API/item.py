@@ -108,7 +108,7 @@ def user_buy_item(request):
     user_coin = UserCoin.objects.get(profile=request.user.pk)
 
     if user_coin.coin >= price:
-        request.data['profile'] = request.user.email
+        request.data['profile'] = request.user.pk
         serializer = UserItemSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
