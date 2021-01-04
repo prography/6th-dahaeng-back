@@ -49,3 +49,12 @@ class JorangSerializer(sz.ModelSerializer):
             'status',
             'title'
         ]
+
+
+class MyClosetSerializer(sz.Serializer):
+    item = sz.IntegerField()
+
+    class Meta:
+        field = [
+            'item'
+        ]

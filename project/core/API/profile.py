@@ -1,4 +1,5 @@
 from django.http import Http404
+from drf_spectacular.utils import extend_schema
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -6,6 +7,7 @@ from rest_framework.response import Response
 from config.permissions import MyIsAuthenticated
 from core.models import UserCoin, Profile
 from core.ERROR.error_cases import GlobalErrorMessage
+from core.serializers import ProfileDetailResSerializer, ProfileDetailReqSerializer
 from record.models import Post
 from shop.models import Jorang
 from shop.serializers import JorangSerializer
@@ -21,6 +23,12 @@ class ProfileDetailView(APIView):
         except Profile.DoesNotExist:
             raise Http404
 
+    @extend_schema(
+        responses=ProfileDetailResSerializer,
+        auth=None,
+        tags=["A - New - Core - GET Profile Detail"],
+        summary="GET Profile detail"
+    )
     def get(self, request, profile_id):
         """
         profile_id 에 해당하는 profile 객체에 대하여,
@@ -63,6 +71,13 @@ class ProfileDetailView(APIView):
             }
         })
 
+    @extend_schema(
+        request=ProfileDetailReqSerializer,
+        responses=ProfileDetailResSerializer,
+        auth=None,
+        tags=["A - New - Core - Post Profile Detail"],
+        summary="POST Profile detail"
+    )
     def post(self, request, profile_id):
         """
         조랭이의 상세 정보, nickname 과 title 을 input 으로 받아

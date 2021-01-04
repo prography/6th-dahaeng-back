@@ -220,7 +220,7 @@ paths:
         2. UserItem 과 Jorang 의 color 를 의미하는 Item 과 매칭.
             -> Item 에 jorang_color 라는 item 객체들이 있고,
             이를 UserItem 을 통해서, User 가 구입한 Item 으로 하나 만들어 주는 것이다.(스타트 보너스)
-            -> 만약 아이템이 존재 하지 않을 경우, 만들었던 조랭이는 삭제 시켜야 한다. 미리미리 상점에 Upload 하자.
+            -> 만약 아이템이 존재 하지 않을 경우, 조랭이 생성에 실패한다. 미리미리 상점에 Upload 하자.
       tags:
       - jorang
       security:
@@ -294,6 +294,7 @@ paths:
 
         TODO: orm 개선
         TODO: permission denined 를 custom 해서 할 수 있게 해야한다.
+      summary: GET Profile detail
       parameters:
       - in: path
         name: profile_id
@@ -301,19 +302,24 @@ paths:
           type: integer
         required: true
       tags:
-      - profile
+      - A - New - Core - GET Profile Detail
       security:
       - jwtAuth: []
       - cookieAuth: []
       - basicAuth: []
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileDetailRes'
+          description: ''
     post:
       operationId: profile_create
       description: |-
         조랭이의 상세 정보, nickname 과 title 을 input 으로 받아
         그것을 저장하고, 그 값을 돌려보내준다.
+      summary: POST Profile detail
       parameters:
       - in: path
         name: profile_id
@@ -321,14 +327,30 @@ paths:
           type: integer
         required: true
       tags:
-      - profile
+      - A - New - Core - Post Profile Detail
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileDetailReq'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProfileDetailReq'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProfileDetailReq'
+        required: true
       security:
       - jwtAuth: []
       - cookieAuth: []
       - basicAuth: []
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileDetailRes'
+          description: ''
   /record/posts/:
     get:
       operationId: record_posts_retrieve
@@ -693,6 +715,36 @@ components:
       - TOUCHED
       - EXTRA
       type: string
+    Item:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        item_name:
+          type: string
+          nullable: true
+          maxLength: 100
+        item_type:
+          type: string
+          nullable: true
+          maxLength: 100
+        item_detail:
+          type: string
+          nullable: true
+          maxLength: 100
+        item_price:
+          type: integer
+        released_at:
+          type: string
+          format: date
+          readOnly: true
+      required:
+      - id
+      - item_detail
+      - item_price
+      - item_type
+      - released_at
     JSONWebToken:
       type: object
       description: |-
@@ -770,6 +822,42 @@ components:
       - id
       - profile
       - question
+    ProfileDetailReq:
+      type: object
+      properties:
+        title:
+          type: string
+        jorang_nickname:
+          type: string
+      required:
+      - jorang_nickname
+      - title
+    ProfileDetailRes:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        title:
+          type: string
+        jorang_nickname:
+          type: string
+        jorang_items:
+          $ref: '#/components/schemas/Item'
+        jorang_status:
+          type: string
+        user_continuity:
+          type: integer
+        user_coin:
+          type: integer
+      required:
+      - email
+      - jorang_items
+      - jorang_nickname
+      - jorang_status
+      - title
+      - user_coin
+      - user_continuity
     RefreshJSONWebToken:
       type: object
       description: Refresh an access token.
@@ -781,6 +869,9 @@ components:
     SignUp:
       type: object
       properties:
+        email:
+          type: string
+          format: email
         password:
           type: string
           writeOnly: true
@@ -788,6 +879,7 @@ components:
           type: string
           writeOnly: true
       required:
+      - email
       - password
       - uid
     UserFeedback:

@@ -1,3 +1,5 @@
+from drf_spectacular.utils import extend_schema
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -5,7 +7,7 @@ from config.permissions import MyIsAuthenticated
 from core.models import Profile
 from core.ERROR.error_cases import GlobalErrorMessage, GlobalErrorMessage400
 from shop.models import Item, UserItem, Jorang
-from shop.serializers import UserItemSerializer
+from shop.serializers import UserItemSerializer, MyClosetSerializer
 
 
 class MyClosetView(APIView):
@@ -19,6 +21,12 @@ class MyClosetView(APIView):
         serializer = UserItemSerializer(user_items, many=True)
         return Response(serializer.data)
 
+    @extend_schema(
+        request=MyClosetSerializer,
+        auth=None,
+        tags=["A - New - Core - POST MyCloset"],
+        summary="POST MyCloset"
+    )
     def post(self, request, format=None):
         """
             내가 샀던 Item 을 조랭이에게 입혀보는 기능이다.
