@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             INSERT INTO shop_jorang_items(useritem_id, jorang_id) 
             SELECT shop_useritem.id, shop_jorang.id
             FROM shop_jorang, shop_item, shop_useritem
-            WHERE shop_jorang.profile_id = shop_useritem.profile_id DISTINCT
+            WHERE shop_jorang.profile_id = shop_useritem.profile_id
             AND shop_useritem.item_id = shop_item.id
             AND shop_jorang.color = shop_item.item_detail
             """
