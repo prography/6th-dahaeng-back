@@ -624,8 +624,21 @@ paths:
     post:
       operationId: shop_mycloset_create
       description: 내가 샀던 Item 을 조랭이에게 입혀보는 기능이다.
+      summary: POST MyCloset
       tags:
-      - shop
+      - A - New - Shop - POST MyCloset
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MyCloset'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MyCloset'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MyCloset'
+        required: true
       security:
       - jwtAuth: []
       - cookieAuth: []
@@ -787,11 +800,20 @@ components:
         nickname:
           type: string
           maxLength: 50
-        color:
-          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
       required:
-      - color
+      - items
       - nickname
+    MyCloset:
+      type: object
+      properties:
+        item:
+          type: integer
+      required:
+      - item
     Post:
       type: object
       properties:
