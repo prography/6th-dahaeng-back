@@ -7,7 +7,8 @@ from config.permissions import MyIsAuthenticated
 from core.models import Profile
 from core.ERROR.error_cases import GlobalErrorMessage, GlobalErrorMessage400
 from shop.models import Item, UserItem, Jorang
-from shop.serializers import UserItemSerializer, MyClosetSerializer
+from shop.serializers import UserItemSerializer
+from shop.API.request_format_serializers import MyClosetSerializer
 
 
 class MyClosetView(APIView):
@@ -24,7 +25,7 @@ class MyClosetView(APIView):
     @extend_schema(
         request=MyClosetSerializer,
         auth=None,
-        tags=["A - New - Core - POST MyCloset"],
+        tags=["A - New - Shop - POST MyCloset"],
         summary="POST MyCloset"
     )
     def post(self, request, format=None):

@@ -8,8 +8,6 @@ from datetime import date
 # Django
 from django.contrib.auth.models import update_last_login
 from django.http import HttpResponseRedirect
-from django.utils.encoding import force_text
-from django.utils.http import urlsafe_base64_decode
 # DRF
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -20,15 +18,15 @@ from rest_framework_jwt.views import ObtainJSONWebToken
 # custom
 from config.permissions import MyIsAuthenticated
 from core.models import Profile, UserCoin
-from core.serializers import ProfileSerializer, SignUpSerializer
+from core.serializers import SignUpSerializer
 from core.API.email import send_email_for_active
 from core.API.jorang import downgrade_jorang_status
 from core.API.util import get_id_of_today_post
 from core.API.request_format_serializers import LoginSerializer
 from core.ERROR.error_cases import GlobalErrorMessage
-from record.serializers import UserQuestionSerializer
 from record.models import UserQuestion
 from shop.models import Jorang
+from shop.serializers import JorangSerializer
 
 
 # /sighup/ 회원 가입
@@ -185,11 +183,11 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
             jorang = Jorang.objects.get(profile=profile)
             has_jorang = True
             jorang_nickname = jorang.nickname
-            jorang_color = jorang.color
+            jorang_items = JorangSerializer(jorang).data.get("items")
         except Jorang.DoesNotExist:
             has_jorang = False
             jorang_nickname = None
-            jorang_color = None
+            jorang_items = None
 
         update_last_login(None, profile)
         today_post_id = get_id_of_today_post(profile)
@@ -202,7 +200,7 @@ class MyObtainJSONWebToken(ObtainJSONWebToken):
                 'has_jorang': has_jorang,
                 'jorang': {
                     'nickname': jorang_nickname,
-                    'color': jorang_color
+                    'items': jorang_items
                 },
                 'today_post_id': today_post_id
             }
