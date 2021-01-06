@@ -1,15 +1,10 @@
 from django.contrib import admin
-from .models import Profile, Jorang, UserCoin, Attendance, PushNotificationMessage, UserFeedback, FirebaseUID
+from .models import Profile, UserCoin, Attendance, PushNotificationMessage, UserFeedback, FirebaseUID
 
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ['id', 'email', 'last_login', 'social']
-
-
-@admin.register(Jorang)
-class JorangAdmin(admin.ModelAdmin):
-    pass
 
 
 @admin.register(UserCoin)

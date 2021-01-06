@@ -1,11 +1,13 @@
+from drf_spectacular.utils import extend_schema
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from config.permissions import MyIsAuthenticated
-from core.models import Jorang, Profile
+from core.models import Profile
 from core.ERROR.error_cases import GlobalErrorMessage, GlobalErrorMessage400
-from shop.models import Item, UserItem
-from shop.serializers import UserItemSerializer
+from shop.models import Item, UserItem, Jorang
+from shop.serializers import UserItemSerializer, MyClosetSerializer
 
 
 class MyClosetView(APIView):
@@ -15,48 +17,53 @@ class MyClosetView(APIView):
         """
             user 가 구입을 했던 item 들을 list 에 넣어 돌려준다.
         """
-        profile = Profile.objects.get(email=request.user.email)
-
-        user_items = UserItem.objects.all().filter(profile=profile.pk)
+        user_items = UserItem.objects.all().filter(profile=request.user)
         serializer = UserItemSerializer(user_items, many=True)
         return Response(serializer.data)
 
+    @extend_schema(
+        request=MyClosetSerializer,
+        auth=None,
+        tags=["A - New - Core - POST MyCloset"],
+        summary="POST MyCloset"
+    )
     def post(self, request, format=None):
         """
             내가 샀던 Item 을 조랭이에게 입혀보는 기능이다.
         """
         profile = request.user
-        color_id = request.data.get('color').get('item')
+        wearing_item_id = request.data.get('item')
+
         try:
-            item = Item.objects.get(id=color_id)
+            item = Item.objects.get(id=wearing_item_id)
         except Item.DoesNotExist:
             raise GlobalErrorMessage('Item 이 DB에 존재 하지 않습니다.')
-        user_item = None
 
-        # 조랭이 색 착용
-        # 같은 타입의 다른 아이템 벗기
+        wearing_item = None
         try:
-            user_item = UserItem.objects.filter(profile=profile.pk, item__item_type=item.item_type).exclude(
-                item__item_detail=item.item_detail)
-            user_item.update(is_worn=False)
+            wearing_item = UserItem.objects.get(profile=profile, item=item)
+        except UserItem.DoesNotExist:
+            raise GlobalErrorMessage("해당 아이템이 없습니다.")
+
+        jorang = None
+        try:
+            jorang = Jorang.objects.get(profile=profile)
+        except Jorang.DoesNotExist:
+            raise GlobalErrorMessage400("조랭이가 없습니다. 조랭이를 먼저 생성하세요.")
+
+        # 같은 타입의 다른 아이템 벗기 (없으면 pass)
+        try:
+            worn_item = jorang.items.get(item__item_type=wearing_item.item.item_type)
+            worn_item.is_worn = False
+            worn_item.save()
+            jorang.items.remove(worn_item)
         except UserItem.DoesNotExist:
             pass
 
-        try:
-            user_color = UserItem.objects.get(profile=profile.pk, item=color_id)
-            user_color.is_worn = True
-            user_color.save()
-        except UserItem.DoesNotExist:
-            if user_item:
-                user_item.update(is_worn=True)
-            raise GlobalErrorMessage("해당 아이템이 없습니다.")
-
-        try:
-            jorang = Jorang.objects.get(profile=profile)
-            jorang.color = item.item_detail
-            jorang.save()
-        except Jorang.DoesNotExist:
-            raise GlobalErrorMessage400("조랭이가 없습니다. 조랭이를 먼저 생성하세요.")
+        # 아이템 착용
+        wearing_item.is_worn = True
+        wearing_item.save()
+        jorang.items.add(wearing_item)
 
         return Response({
             "response": "success",

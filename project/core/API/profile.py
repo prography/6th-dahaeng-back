@@ -1,12 +1,16 @@
 from django.http import Http404
+from drf_spectacular.utils import extend_schema
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from config.permissions import MyIsAuthenticated
-from core.models import Jorang, UserCoin, Profile
+from core.models import UserCoin, Profile
 from core.ERROR.error_cases import GlobalErrorMessage
+from core.serializers import ProfileDetailResSerializer, ProfileDetailReqSerializer
 from record.models import Post
+from shop.models import Jorang
+from shop.serializers import JorangSerializer
 
 
 # profile/<int:profile_id>/
@@ -19,6 +23,12 @@ class ProfileDetailView(APIView):
         except Profile.DoesNotExist:
             raise Http404
 
+    @extend_schema(
+        responses=ProfileDetailResSerializer,
+        auth=None,
+        tags=["A - New - Core - GET Profile Detail"],
+        summary="GET Profile detail"
+    )
     def get(self, request, profile_id):
         """
         profile_id 에 해당하는 profile 객체에 대하여,
@@ -35,6 +45,7 @@ class ProfileDetailView(APIView):
 
         try:
             jorang = Jorang.objects.get(profile=profile.id)
+            jorang_serializer = JorangSerializer(jorang)
         except Jorang.DoesNotExist:
             raise GlobalErrorMessage('해당 유저는 조랭이를 만들지 않았습니다. 조랭이를 만들어 주세요.')
 
@@ -53,13 +64,20 @@ class ProfileDetailView(APIView):
                 'email': profile.email,
                 'title': jorang.title,
                 'jorang_nickname': jorang.nickname,
-                'jorang_color': jorang.color,
+                'jorang_items': jorang_serializer.data.get('items'),
                 'jorang_status': jorang.status,
                 'user_continuity': continuity,
                 'user_coin': user_coin.coin
             }
         })
 
+    @extend_schema(
+        request=ProfileDetailReqSerializer,
+        responses=ProfileDetailResSerializer,
+        auth=None,
+        tags=["A - New - Core - Post Profile Detail"],
+        summary="POST Profile detail"
+    )
     def post(self, request, profile_id):
         """
         조랭이의 상세 정보, nickname 과 title 을 input 으로 받아
@@ -84,6 +102,7 @@ class ProfileDetailView(APIView):
 
         try:
             jorang = Jorang.objects.get(profile=profile.id)
+            jorang_serializer = JorangSerializer(jorang)
         except Jorang.DoesNotExist:
             raise GlobalErrorMessage('해당 유저는 조랭이를 만들지 않았습니다. 조랭이를 만들어 주세요.')
 
@@ -97,7 +116,7 @@ class ProfileDetailView(APIView):
                 'email': profile.email,
                 'title': jorang.title,
                 'jorang_nickname': jorang.nickname,
-                'jorang_color': jorang.color,
+                'jorang_items': jorang_serializer.data.get('items'),
                 'jorang_status': jorang.status,
                 'user_continuity': continuity,
                 'user_coin': user_coin.coin
