@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from config.permissions import MyIsAuthenticated
 from core.models import UserCoin, Profile
 from core.ERROR.error_cases import GlobalErrorMessage
-from core.serializers import ProfileDetailResSerializer, ProfileDetailReqSerializer
+from core.API.request_format_serializers import ProfileDetailResSerializer, ProfileDetailReqSerializer
 from record.models import Post
 from shop.models import Jorang
 from shop.serializers import JorangSerializer
