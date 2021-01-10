@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
             FROM shop_jorang, shop_item, shop_useritem
             WHERE shop_jorang.profile_id = shop_useritem.profile_id
             AND shop_useritem.item_id = shop_item.id
-            AND shop_item.item_detail = "background-ground"
+            AND shop_item.item_detail = 'background-ground'
             """
         )
     ]
