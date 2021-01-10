@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view, permission_classes
 from config.permissions import MyIsAuthenticated
 from config.utils import random_color
 from core.ERROR.error_cases import GlobalErrorMessage
-from shop.models import Jorang, UserItem
+from shop.models import Jorang, UserItem, Item
 
 
 # /jorang/
@@ -65,8 +65,11 @@ def is_jorang_exist(profile_pk):
 
 def add_jorang_default_items(profile):
     color = random_color()
+    back = Item.objects.get(item_type="background", item_detail="background-ground")
+
     default_color = UserItem.objects.create(profile=profile, item=color, is_worn=True)
-    default_back = UserItem.objects.create(profile=profile, item__item_detail="background-ground", is_worn=True)
+    default_back = UserItem.objects.create(profile=profile, item=back, is_worn=True)
+
     return default_color, default_back
 
 
