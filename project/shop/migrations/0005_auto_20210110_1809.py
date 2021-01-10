@@ -16,6 +16,7 @@ class Migration(migrations.Migration):
             SELECT core_profile.id, shop_item.id, True
             FROM core_profile, shop_item
             WHERE shop_item.item_detail = "background-ground"
+            AND shop_item.item_type = "background"
             """
         )
     ]
