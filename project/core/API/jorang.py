@@ -6,8 +6,7 @@ from rest_framework.decorators import api_view, permission_classes
 from config.permissions import MyIsAuthenticated
 from config.utils import random_color
 from core.ERROR.error_cases import GlobalErrorMessage
-from shop.models import Jorang, Item, UserItem
-from shop.serializers import UserItemSerializer
+from shop.models import Jorang, UserItem, Item
 
 
 # /jorang/
@@ -37,17 +36,18 @@ def create(request):
         raise GlobalErrorMessage('request body 의 파라미터가 잘못되었습니다.')
 
     profile = request.user
-    color = random_color()
 
     if is_jorang_exist(profile_pk=profile.pk):
         raise GlobalErrorMessage('이미 조랭이를 가지고 있는 계정입니다.')
 
-    user_color = UserItem.objects.create(profile=profile, item=color, is_worn=True)
+    color, background = add_jorang_default_items(profile)
+
     user_jorang = Jorang.objects.create(
         nickname=nickname,
         profile=profile
     )
-    user_jorang.items.add(user_color)
+    user_jorang.items.add(color)
+    user_jorang.items.add(background)
 
     return Response({
         'response': 'success',
@@ -61,6 +61,16 @@ def is_jorang_exist(profile_pk):
         return True
     except Jorang.DoesNotExist:
         return False
+
+
+def add_jorang_default_items(profile):
+    color = random_color()
+    back = Item.objects.get(item_type="background", item_detail="background-ground")
+
+    default_color = UserItem.objects.create(profile=profile, item=color, is_worn=True)
+    default_back = UserItem.objects.create(profile=profile, item=back, is_worn=True)
+
+    return default_color, default_back
 
 
 def upgrade_jorang_status(profile):
