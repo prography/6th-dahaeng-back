@@ -1,15 +1,108 @@
-<html>
-안녕하세요 다행입니다.
-<br>
-아래 버튼을 눌러서, 인증을 해주세요.
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>이메일 인증</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  </head>
+  <body>
+    <table align="center" border="0" cellpadding="0" cellspacing="0" style="width:800;background-color:#f8f8f9;letter-spacing:-1px;">
+      <tbody>
+      <tr>
+        <td align="center">
+          <div style="max-width:595px; margin: 0 auto">
+          <table cellpadding="0" cellspacing="0" style="width:100%;margin:0 auto;background-color:#fff;;-webkit-text-size-adjust:100%;">
+            <tbody>
+            <tr>
+              <td colspan="3" height="10">
+              </td>
+            </tr>
+            <tr>
+              <td width="21"></td>
+              <td>
+                <table cellpading="0" cellspacing="0" style="width:100%;margin:0;padding:0">
+                 <tbody>
+                   <tr>
+                     <!--여기다가 이미지-->
+                     <td style="margin:0;padding:0"><img src="https://simple-image-bucket.s3.ap-northeast-2.amazonaws.com/dahaeng_email.png" width="100%" height="" alt="Dahaeng" style="border:0;" loading="lazy"></td>
+                   </tr>
+                   <tr>
+                     <td height:"11"></td>
+                   </tr>
+                 </tbody>
+                </table>
+              </td>
+              <td width="21"></td>
+            </tr>
+            <tr>
+              <td width="21"></td>
+              <td>
+                <table cellpadding="0" cellspacing="0" style="width:100%;margin:0;padding:0">
+                  <tbody>
+                    <tr>
+                      <td style="word-break: keep-all;font-size: 24px; font-family:'나눔고딕', NanumGothic, '맑은 고딕', Malgun Gothic,'돋움',Dotum,Helvetica,'Apple SD Gothic Neo',Sans-serif; color:#424240; line-height:34px;vertical-align:top;">다행 회원가입 인증 메일</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="3" height="1" style="background:#e5e5e5"></td>
+            </tr>
+            <tr>
+              <td colspan="3" height="26"></td>
+            </tr>
+            <!--인증 안내 멘트-->
+            <tr>
+              <td rowspan="5" width="21"></td>
+              <td>
+                <table cellpadding="0" cellspacing="0" style="width:100%;margin:0;padding:0">
+                  <tbody>
+                    <tr>
+                      <td width="" style="padding-bottom:9px;font-size:14px;word-break: keep-all;font-family: '나눔고딕', NanumGothic, '맑은 고딕', Malgun Gothic,'돋움',Dotum,Helvetica,'Apple SD Gothic Neo',Sans-serif; color:#333; vertical-align:top">다행과 함께 행복을 찾기 위해서, 아래 버튼을 클릭해 인증을 완료해주세요.</td>
+                    </tr>
+                    <tr>
+                      <td width="" style="padding-bottom:9px;font-size:14px;word-break: keep-all;font-family: '나눔고딕', NanumGothic, '맑은 고딕', Malgun Gothic,'돋움',Dotum,Helvetica,'Apple SD Gothic Neo',Sans-serif; color:#333; vertical-align:top">인증은 첫 가입시 한 번만 진행됩니다.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+              <td rowspan="5" width="21"></td>
+            </tr>
+            <tr>
+              <td colspan="3" height="10"></td>
+            </tr>
+            <tr>
+              <td align="center" colspan="3">
+                <div style="display:inline-block;width:130px;max-width:100%;vertical-align:top">
+                <table cellpadding="0" cellspacing="0" style="table-layout: fixed; width:100%;background:#a26c8f">
+                  <tbody>
+                    <tr>
+                      <td height: "56" style="text-align:center">
+                        <!--인증 버튼-->
+                        <form action="https://api.dahaengback.shop/user_active/" accept-charset="utf-8" name="person_info" method="GET">
 
+                            <input style="display:none;" type="text" name="profile_id" placeholder=`{{profile_id}}` value=`{{profile_id}}` />
 
-<!--<form action="http://localhost:8000/user_active/" accept-charset="utf-8" name="person_info" method="GET">-->
-<form action="https://api.dahaengback.shop/user_active/" accept-charset="utf-8" name="person_info" method="GET">
-
-    <input style="display:none;" type="text" name="profile_id" placeholder=`{{profile_id}}` value=`{{profile_id}}` />
-
-    <input style="display:none;" type="text" name="token" placeholder=`{{token}}` value=`{{token}}` />
-    <button type='submit'> 인증하기</button>
-</form>
+                            <input style="display:none;" type="text" name="token" placeholder=`{{token}}` value=`{{token}}` />
+                            <button type='submit' height="25" style="display:block;font-size:15px;color:#fff;text-decoration:none;line-height:25px;font-family:'나눔고딕', NanumGothic, '맑은 고딕', Malgun Gothic,'돋움',Dotum,Helvetica,'Apple SD Gothic Neo',Sans-serif;">인증하기</button>
+                        </form>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+               </div>
+             </td>
+           </tr>
+           <tr>
+            <td colspan="3" height="20"></td>
+           </tr>
+          </tbody>
+         </table>
+        </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</body>
 </html>
