@@ -24,7 +24,7 @@ Django==3.0.5
 django-cors-headers==3.3.0
 django-crontab==0.7.1
 django-storages==1.9.1
-djangorestframework==3.11.0
+djangorestframework==3.11.2
 djangorestframework-jwt==1.11.0
 docker==4.3.1
 docker-compose==1.25.5
