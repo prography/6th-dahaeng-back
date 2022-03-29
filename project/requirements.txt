@@ -57,7 +57,7 @@ jsonschema==3.2.0
 kappa==0.6.0
 msgpack==1.0.2
 mysqlclient==2.0.1
-paramiko==2.7.2
+paramiko==2.10.1
 pathspec==0.5.9
 Pillow==7.1.2
 pip-tools==5.3.1
